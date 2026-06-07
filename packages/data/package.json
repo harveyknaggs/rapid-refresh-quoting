@@ -1,0 +1,13 @@
+{
+  "name": "@rapid-refresh/data",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "QuoteRepository interface + adapters (in-memory, IndexedDB; REST later).",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "node --test test/memory.test.ts"
+  }
+}

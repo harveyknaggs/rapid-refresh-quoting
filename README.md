@@ -52,7 +52,7 @@ npm test          # → node --test test/*.test.ts
 
 ## Status
 - [x] Milestone 1 — pricing layer + tests (21 passing)
-- [ ] Milestone 2 — data model + persistence interface
+- [x] Milestone 2 — data model + persistence interface (30 passing total)
 - [ ] Milestone 3 — core quoting UI (multi-scope, live blended margin)
 - [ ] Milestone 4 — track-actuals, sensitivity, duplicate, search
 - [ ] Milestone 5 — client-facing quote document/export

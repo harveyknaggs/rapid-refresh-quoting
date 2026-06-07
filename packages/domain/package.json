@@ -1,0 +1,13 @@
+{
+  "name": "@rapid-refresh/domain",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Quote schema (Quote/Scope/LineItem), ULID ids, rate-card seed, title + pricing path.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "node --test test/domain.test.ts"
+  }
+}

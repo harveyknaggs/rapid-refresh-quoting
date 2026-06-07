@@ -1,0 +1,13 @@
+{
+  "name": "@rapid-refresh/pricing",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Framework-agnostic pricing calculation layer (true margin, GST, fuel levy, rounding) for the Rapid Refresh ecosystem.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "node --test test/money.test.ts test/rates.test.ts test/quote.test.ts"
+  }
+}

@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { QuoteList } from './QuoteList.tsx';
 import { QuoteEditor } from './QuoteEditor.tsx';
 import { ClientDoc } from './ClientDoc.tsx';
+import { Settings } from './Settings.tsx';
 
-type View = { name: 'list' } | { name: 'edit'; id: string } | { name: 'doc'; id: string };
+type View = { name: 'list' } | { name: 'edit'; id: string } | { name: 'doc'; id: string } | { name: 'settings' };
 
 export function App() {
   const [view, setView] = useState<View>({ name: 'list' });
@@ -14,6 +15,7 @@ export function App() {
         <h1 onClick={() => setView({ name: 'list' })} style={{ cursor: 'pointer' }}>🌿 Rapid Refresh — Quoting</h1>
         <div className="spacer" />
         {view.name !== 'list' && <button onClick={() => setView({ name: 'list' })}>Quotes</button>}
+        <button onClick={() => setView({ name: 'settings' })} title="Business details">⚙</button>
       </div>
 
       {view.name === 'list' && <QuoteList onOpen={(id) => setView({ name: 'edit', id })} />}
@@ -26,6 +28,7 @@ export function App() {
         />
       )}
       {view.name === 'doc' && <ClientDoc quoteId={view.id} onBack={() => setView({ name: 'edit', id: view.id })} />}
+      {view.name === 'settings' && <Settings onBack={() => setView({ name: 'list' })} />}
     </div>
   );
 }

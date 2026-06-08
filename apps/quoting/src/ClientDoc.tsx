@@ -3,7 +3,8 @@ import {
   deriveTitle, priceScope, priceQuoteVersion,
   type Quote, type QuoteVersion,
 } from '@rapid-refresh/domain';
-import { repo, BUSINESS } from './repo.ts';
+import { repo } from './repo.ts';
+import { getBusiness } from './settings.ts';
 import { fmt } from './format.ts';
 
 // Client-facing document. Shows ONLY what the client should see — no internal cost rates or margins.
@@ -22,6 +23,7 @@ export function ClientDoc({ quoteId, onBack }: { quoteId: string; onBack: () => 
   }, [quoteId]);
 
   if (!quote || !version) return <div className="card">Loading…</div>;
+  const BUSINESS = getBusiness();
   const t = priceQuoteVersion(version).total;
 
   return (

@@ -1,0 +1,14 @@
+{
+  "name": "Rapid Refresh — Quoting",
+  "short_name": "Quoting",
+  "description": "Build landscaping quotes on site, offline.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f172a",
+  "theme_color": "#16a34a",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

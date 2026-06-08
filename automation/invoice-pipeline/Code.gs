@@ -54,8 +54,28 @@ function onOpen() {
     .addToUi();
 }
 
+// Known starting rates so the price book works on day one (editable; invoices update them later).
+const SEED_PRICEBOOK = [
+  ['19mm drainage chip', 'm3', 102, 'ex-GST', 30, 'Canterbury Landscape', '', 'seed'],
+  ['Bark / brown chip', 'm3', 84.50, 'ex-GST', 30, '', '', 'seed'],
+  ['AP20 basecourse', 'm3', 90, 'ex-GST', 30, '', '', 'seed'],
+  ['Stone supply', 'm3', 160, 'ex-GST', 30, '', '', 'seed'],
+  ['Boxing timber', 'lineal m', 12, 'ex-GST', 40, '', '', 'seed'],
+  ['Corten steel boxing', 'lineal m', 45, 'ex-GST', 40, '', '', 'seed'],
+  ['450x900 pavers', 'each', 37.17, 'ex-GST', 40, '', '', 'seed'],
+  ['Labour', 'hour', 37, 'ex-GST', 40, '', '', 'seed'],
+  ['Artificial turf (sell ~$190/m2)', 'm2', 56, 'ex-GST', 40, '', '', 'seed'],
+];
+
+function seedPriceBook_() {
+  var sh = SpreadsheetApp.getActive().getSheetByName('PriceBook');
+  if (sh.getLastRow() >= 2) return; // already has rows — don't clobber
+  sh.getRange(2, 1, SEED_PRICEBOOK.length, SEED_PRICEBOOK[0].length).setValues(SEED_PRICEBOOK);
+}
+
 function setup() {
   ensureSheets_();
+  seedPriceBook_();
   const exists = ScriptApp.getProjectTriggers().some(function (t) { return t.getHandlerFunction() === 'processInvoices'; });
   if (!exists) ScriptApp.newTrigger('processInvoices').timeBased().everyMinutes(15).create();
   getOrCreateLabel_(DONE_LABEL);

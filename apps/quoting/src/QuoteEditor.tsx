@@ -5,6 +5,7 @@ import {
 } from '@rapid-refresh/domain';
 import { sensitivity, reconcile } from '@rapid-refresh/pricing';
 import { repo } from './repo.ts';
+import { loadPriceBook } from './priceBook.ts';
 import { fmt, pct, dollarsToCents } from './format.ts';
 import { LineForm } from './LineForm.tsx';
 
@@ -18,7 +19,8 @@ export function QuoteEditor({ quoteId, onBack, onViewDoc, onOpen }: {
 }) {
   const [quote, setQuote] = useState<Quote | null>(null);
   const [version, setVersion] = useState<QuoteVersion | null>(null);
-  const [rateCard] = useState<RateCardItem[]>(() => seedRateCard());
+  const [rateCard, setRateCard] = useState<RateCardItem[]>(() => seedRateCard());
+  useEffect(() => { loadPriceBook().then((items) => { if (items && items.length) setRateCard(items); }); }, []);
   const [addingFor, setAddingFor] = useState<string | null>(null);
   const [actuals, setActuals] = useState<ActualEntry[]>([]);
   const [actualsOpen, setActualsOpen] = useState(false);

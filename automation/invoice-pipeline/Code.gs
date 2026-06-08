@@ -16,10 +16,11 @@
  *   4. Done. The 🧾 Invoices menu appears in the sheet; the timer is running.
  */
 
-const MODEL = 'claude-haiku-4-5-20251001';   // cheap + supports PDF reading
+const MODEL = 'claude-haiku-4-5-20251001';   // cheap + supports PDF/image reading
 const SRC_LABEL = 'Invoices';
 const DONE_LABEL = 'invoice-processed';
-const MAX_THREADS_PER_RUN = 15;
+const MAX_THREADS_PER_RUN = 25;              // safety cap per execution
+const TIME_BUDGET_MS = 270000;               // stop ~4.5 min in (Apps Script limit is 6 min)
 
 const PROMPT = [
   'You are reading a supplier invoice PDF for a New Zealand landscaping business.',
@@ -84,39 +85,45 @@ function processInvoices() {
   if (!key) { log_('No ANTHROPIC_API_KEY set — add it in Project Settings → Script properties.'); return; }
   ensureSheets_();
   var done = getOrCreateLabel_(DONE_LABEL);
-  var threads = GmailApp.search('label:' + SRC_LABEL + ' -label:' + DONE_LABEL + ' has:attachment', 0, MAX_THREADS_PER_RUN);
+  var start = Date.now();
+  var threads = GmailApp.search('label:' + SRC_LABEL + ' -label:' + DONE_LABEL, 0, MAX_THREADS_PER_RUN);
+  var processed = 0, withPrices = 0;
   for (var i = 0; i < threads.length; i++) {
+    if (Date.now() - start > TIME_BUDGET_MS) break; // leave room before the 6-min cap
     var thread = threads[i];
     try {
-      var wroteAny = false;
+      var hadError = false, sawDoc = false;
       var msgs = thread.getMessages();
       for (var m = 0; m < msgs.length; m++) {
         var atts = msgs[m].getAttachments();
         for (var a = 0; a < atts.length; a++) {
-          if (atts[a].getContentType() !== 'application/pdf') continue;
-          var data = extractInvoice_(key, atts[a]);
-          if (data && data.items && data.items.length) { writePending_(data, thread.getId()); wroteAny = true; }
+          var ct = atts[a].getContentType();
+          if (ct !== 'application/pdf' && ct.indexOf('image/') !== 0) continue;
+          sawDoc = true;
+          var data = extractInvoice_(key, atts[a], ct);
+          if (data === null) { hadError = true; }
+          else if (data.items && data.items.length) { writePending_(data, thread.getId()); withPrices++; }
         }
       }
-      if (wroteAny) { thread.addLabel(done); }
+      // Label done unless a transient API error occurred (so statements/promos aren't retried,
+      // but genuine failures get another go next run).
+      if (!hadError) { thread.addLabel(done); processed++; }
     } catch (e) {
       log_('Thread ' + thread.getId() + ' error: ' + e);
     }
   }
+  log_('Run: ' + processed + ' threads cleared, ' + withPrices + ' invoice(s) with prices added.');
 }
 
-function extractInvoice_(key, attachment) {
+function extractInvoice_(key, attachment, contentType) {
   var b64 = Utilities.base64Encode(attachment.getBytes());
+  var block = (contentType === 'application/pdf')
+    ? { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: b64 } }
+    : { type: 'image', source: { type: 'base64', media_type: contentType, data: b64 } };
   var payload = {
     model: MODEL,
     max_tokens: 2000,
-    messages: [{
-      role: 'user',
-      content: [
-        { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: b64 } },
-        { type: 'text', text: PROMPT },
-      ],
-    }],
+    messages: [{ role: 'user', content: [block, { type: 'text', text: PROMPT }] }],
   };
   var res = UrlFetchApp.fetch('https://api.anthropic.com/v1/messages', {
     method: 'post',

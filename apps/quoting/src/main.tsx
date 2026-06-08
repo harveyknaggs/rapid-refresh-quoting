@@ -1,11 +1,14 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { App } from './App.tsx';
+import { Gate } from './Gate.tsx';
 import './styles.css';
 
 createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <App />
+    <Gate>
+      <App />
+    </Gate>
   </React.StrictMode>,
 );
 

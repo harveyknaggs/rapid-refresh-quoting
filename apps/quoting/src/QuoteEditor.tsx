@@ -6,6 +6,7 @@ import {
 import { sensitivity, reconcile } from '@rapid-refresh/pricing';
 import { repo } from './repo.ts';
 import { loadPriceBook } from './priceBook.ts';
+import { generateScopes } from './ai.ts';
 import { fmt, pct, dollarsToCents } from './format.ts';
 import { LineForm } from './LineForm.tsx';
 
@@ -24,6 +25,9 @@ export function QuoteEditor({ quoteId, onBack, onViewDoc, onOpen }: {
   const [addingFor, setAddingFor] = useState<string | null>(null);
   const [actuals, setActuals] = useState<ActualEntry[]>([]);
   const [actualsOpen, setActualsOpen] = useState(false);
+  const [desc, setDesc] = useState('');
+  const [genBusy, setGenBusy] = useState(false);
+  const [genErr, setGenErr] = useState('');
   const saveTimer = useRef<number | undefined>(undefined);
 
   const load = async () => {
@@ -60,6 +64,18 @@ export function QuoteEditor({ quoteId, onBack, onViewDoc, onOpen }: {
     onOpen(dup.quote.id);
   };
 
+  const generate = async () => {
+    if (!desc.trim()) return;
+    setGenBusy(true); setGenErr('');
+    try {
+      const scopes = await generateScopes(desc, rateCard);
+      if (!scopes.length) setGenErr('No scopes produced — try adding more detail.');
+      else { commit({ ...version, scopes: [...version.scopes, ...scopes] }); setDesc(''); }
+    } catch (e: any) {
+      setGenErr(String(e && e.message ? e.message : e));
+    } finally { setGenBusy(false); }
+  };
+
   const priced = priceQuoteVersion(version);
   const t = priced.total;
   const hasLines = version.scopes.some((s) => s.lines.length);
@@ -82,6 +98,17 @@ export function QuoteEditor({ quoteId, onBack, onViewDoc, onOpen }: {
           <button className="btn secondary sm" onClick={duplicate}>Duplicate</button>
           <button className="btn secondary sm" onClick={() => onViewDoc(quoteId)}>Client document</button>
         </div>
+      </div>
+
+      <div className="card">
+        <h3>✨ Describe the job</h3>
+        <p className="muted small">Type it in plain English — it builds priced scopes &amp; lines you can tweak.</p>
+        <textarea className="input" rows={3} value={desc} onChange={(e) => setDesc(e.target.value)}
+          placeholder="e.g. 766 m² of 19mm drainage chip at 40mm. Plus 80 m² hydroseed. One day digger + labour to move the chip." />
+        <button className="btn block" style={{ marginTop: 8 }} disabled={genBusy || !desc.trim()} onClick={generate}>
+          {genBusy ? 'Generating…' : '✨ Generate scopes'}
+        </button>
+        {genErr && <div className="issue">⚠ {genErr}</div>}
       </div>
 
       {version.scopes.map((scope) => {

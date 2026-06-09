@@ -275,7 +275,27 @@ function writePending_(data, threadId) {
   if (!rows.length) return;
   var start = pending.getLastRow() + 1;
   pending.getRange(start, 1, rows.length, rows[0].length).setValues(rows);
-  pending.getRange(start, 12, rows.length, 1).insertCheckboxes(); // Approve column
+  pending.getRange(start, 12, rows.length, 1).insertCheckboxes(); // Approve column (audit trail)
+  autoApplyToBook_(ss, data); // also push straight into the Price Book — fully automatic
+}
+
+// Upsert an invoice's material lines into the Price Book (latest price wins; junk skipped; margins kept).
+function autoApplyToBook_(ss, data) {
+  var book = ss.getSheetByName('PriceBook');
+  var idx = {};
+  if (book.getLastRow() >= 2) {
+    book.getRange(2, 1, book.getLastRow() - 1, 1).getValues().forEach(function (r, i) { if (r[0]) idx[String(r[0]).toLowerCase().trim()] = i + 2; });
+  }
+  (data.items || []).forEach(function (it) {
+    var item = String(it.item || '').trim();
+    var qty = Number(it.qty), price = Number(it.unitPrice);
+    if (!item || qty <= 0 || price <= 0 || SKIP_RE.test(item)) return;
+    var priceEx = it.gstInclusive ? Math.round(price / 1.15 * 100) / 100 : price;
+    var key = item.toLowerCase();
+    var rec = [item, it.unit || '', priceEx, 'ex-GST', 30, data.supplier || '', new Date(), data.invoiceNumber || ''];
+    if (idx[key]) { rec[4] = book.getRange(idx[key], 5).getValue(); book.getRange(idx[key], 1, 1, 8).setValues([rec]); }
+    else { book.appendRow(rec); idx[key] = book.getLastRow(); }
+  });
 }
 
 function bookIndex_(ss) {

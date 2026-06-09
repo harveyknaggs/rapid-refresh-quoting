@@ -47,30 +47,107 @@ const PROMPT = [
 
 function onOpen() {
   SpreadsheetApp.getUi().createMenu('🧾 Invoices')
+    .addItem('Refresh price book (curated)', 'refreshPriceBook')
     .addItem('Process now', 'processInvoices')
     .addItem('Apply approved → Price Book', 'applyApproved')
+    .addItem('Apply ALL pending → Price Book', 'applyAllPending')
     .addSeparator()
     .addItem('Set up (run once)', 'setup')
     .addToUi();
 }
 
-// Known starting rates so the price book works on day one (editable; invoices update them later).
-const SEED_PRICEBOOK = [
-  ['19mm drainage chip', 'm3', 102, 'ex-GST', 30, 'Canterbury Landscape', '', 'seed'],
-  ['Bark / brown chip', 'm3', 84.50, 'ex-GST', 30, '', '', 'seed'],
-  ['AP20 basecourse', 'm3', 90, 'ex-GST', 30, '', '', 'seed'],
-  ['Stone supply', 'm3', 160, 'ex-GST', 30, '', '', 'seed'],
-  ['Boxing timber', 'lineal m', 12, 'ex-GST', 40, '', '', 'seed'],
-  ['Corten steel boxing', 'lineal m', 45, 'ex-GST', 40, '', '', 'seed'],
-  ['450x900 pavers', 'each', 37.17, 'ex-GST', 40, '', '', 'seed'],
-  ['Labour', 'hour', 37, 'ex-GST', 40, '', '', 'seed'],
-  ['Artificial turf (sell ~$190/m2)', 'm2', 56, 'ex-GST', 40, '', '', 'seed'],
+// Curated from real invoices (latest ex-GST cost, deduped). Cols: item,unit,cost,gst,margin,supplier,_,src
+// Margin 0 = pass-through at cost (hire/disposal/delivery). Editable — your margin edits are kept on refresh.
+const PRICEBOOK = [
+  ['19mm Drainage Chip', 'm3', 102, 'ex-GST', 30, 'Canterbury Landscape', '', 'curated'],
+  ['Premium Brown Chip', 'm3', 91, 'ex-GST', 30, 'Canterbury Landscape', '', 'curated'],
+  ['Arbor Mulch', 'm3', 26, 'ex-GST', 30, 'Canterbury Landscape', '', 'curated'],
+  ['15mm Waipapa White Chip', 'scoop', 49.17, 'ex-GST', 30, 'Canterbury Landscape', '', 'curated'],
+  ['White Ice Lime 20mm', 'scoop', 65.84, 'ex-GST', 30, 'Garden Box', '', 'curated'],
+  ['White Ice Lime 15mm', 'scoop', 65.84, 'ex-GST', 30, 'Garden Box', '', 'curated'],
+  ['Arctic White / Waituna 15-20mm', 'scoop', 107.39, 'ex-GST', 30, 'Garden Box', '', 'curated'],
+  ['Black Satin Chip', 'scoop', 43.59, 'ex-GST', 30, 'Garden Box', '', 'curated'],
+  ['Grade 4 Chip 12mm', 'scoop', 28.91, 'ex-GST', 30, 'Garden Box', '', 'curated'],
+  ['Topcourse AP20', 'scoop', 26.33, 'ex-GST', 30, 'Garden Box', '', 'curated'],
+  ['Crusher Dust AP5', 'scoop', 31.68, 'ex-GST', 30, 'Garden Box', '', 'curated'],
+  ['Garden Soil (Planting Mix)', 'scoop', 23.20, 'ex-GST', 30, 'Garden Box', '', 'curated'],
+  ['Garden Grow Compost', 'scoop', 27.16, 'ex-GST', 30, 'Garden Box', '', 'curated'],
+  ['Vita Blend Organic Compost', 'scoop', 44.32, 'ex-GST', 30, 'Garden Box', '', 'curated'],
+  ['Paver Carbon/Bluestone 900x450x40', 'each', 37.17, 'ex-GST', 40, 'Garden Box', '', 'curated'],
+  ['SmartPave White Panel 1144x806x32', 'each', 39.09, 'ex-GST', 40, 'Garden Box', '', 'curated'],
+  ['Steptread Porcelain Charcoal Nosing', 'each', 5.00, 'ex-GST', 40, 'Tilemax', '', 'curated'],
+  ['Weedmat Non Woven 60gsm 1x25m', 'roll', 18.96, 'ex-GST', 40, 'Garden Box', '', 'curated'],
+  ['Weedmat Pins 130mm (Box 200)', 'box', 35.11, 'ex-GST', 40, 'Garden Box', '', 'curated'],
+  ['Weedsafe Pro Weedmat 1x25m', 'each', 24.78, 'ex-GST', 40, 'Garden Box', '', 'curated'],
+  ['Glyphosate 360 Weedkiller 1L', 'litre', 18.59, 'ex-GST', 40, 'Garden Box', '', 'curated'],
+  ['Lomandra Lime Tuff 1L', 'each', 12.49, 'ex-GST', 35, 'Big Little Tree', '', 'curated'],
+  ['Prunus lusitanica Std PB28', 'each', 121.74, 'ex-GST', 35, 'Big Little Tree', '', 'curated'],
+  ["Nandina 'Firepower'", 'each', 8.95, 'ex-GST', 35, 'Elliotts', '', 'curated'],
+  ['Ophiopogon Black Dragon', 'each', 7.50, 'ex-GST', 35, 'Elliotts', '', 'curated'],
+  ['Ophiopogon Japonica', 'each', 7.50, 'ex-GST', 35, 'Elliotts', '', 'curated'],
+  ['Boxing Timber', 'lineal m', 12, 'ex-GST', 40, '', '', 'curated'],
+  ['Corten Steel Boxing', 'lineal m', 45, 'ex-GST', 40, '', '', 'curated'],
+  ['Stone Supply', 'm3', 160, 'ex-GST', 30, '', '', 'curated'],
+  ['Artificial Turf', 'm2', 56, 'ex-GST', 40, '', '', 'curated'],
+  ['Labour', 'hour', 37, 'ex-GST', 40, '', '', 'curated'],
+  ['Greenwaste Dump', 'tonne', 195, 'ex-GST', 0, 'Frews / CLS', '', 'curated'],
+  ['Mixed C/Waste Dump', 'tonne', 291, 'ex-GST', 0, 'Frews', '', 'curated'],
+  ['Compactor Plate Hire (full day)', 'day', 74.35, 'ex-GST', 0, 'Garden Box', '', 'curated'],
+  ['Compactor Plate Hire (half day)', 'each', 49.57, 'ex-GST', 0, 'Garden Box', '', 'curated'],
+  ['Trailer Hire (per hour)', 'hour', 4.35, 'ex-GST', 0, 'Garden Box', '', 'curated'],
+  ['Delivery — Garden Box (1-2m3)', 'load', 42.17, 'ex-GST', 0, 'Garden Box', '', 'curated'],
+  ['Delivery — Canterbury Landscape Zone 2', 'load', 75.65, 'ex-GST', 0, 'Canterbury Landscape', '', 'curated'],
 ];
 
 function seedPriceBook_() {
   var sh = SpreadsheetApp.getActive().getSheetByName('PriceBook');
   if (sh.getLastRow() >= 2) return; // already has rows — don't clobber
-  sh.getRange(2, 1, SEED_PRICEBOOK.length, SEED_PRICEBOOK[0].length).setValues(SEED_PRICEBOOK);
+  sh.getRange(2, 1, PRICEBOOK.length, PRICEBOOK[0].length).setValues(PRICEBOOK);
+}
+
+// One-click: (re)load the curated price book, keeping any Margin % you've edited by item name.
+function refreshPriceBook() {
+  var sh = SpreadsheetApp.getActive().getSheetByName('PriceBook');
+  var margins = {};
+  if (sh.getLastRow() >= 2) {
+    sh.getRange(2, 1, sh.getLastRow() - 1, 5).getValues().forEach(function (r) {
+      if (r[0]) margins[String(r[0]).toLowerCase().trim()] = r[4];
+    });
+    sh.getRange(2, 1, sh.getLastRow() - 1, sh.getLastColumn()).clearContent();
+  }
+  var rows = PRICEBOOK.map(function (r) {
+    var key = String(r[0]).toLowerCase().trim();
+    var m = (margins[key] !== undefined && margins[key] !== '') ? margins[key] : r[4];
+    return [r[0], r[1], r[2], r[3], m, r[5], new Date(), r[7]];
+  });
+  sh.getRange(2, 1, rows.length, rows[0].length).setValues(rows);
+  SpreadsheetApp.getActive().toast(rows.length + ' items loaded into the Price Book.', 'Rapid Refresh', 6);
+}
+
+// Future invoices: apply EVERY pending row (skipping obvious non-materials) without ticking each.
+var SKIP_RE = /faf|delivery|freight|green ?waste|dump|hire|trailer|compactor|xero|drinks|credit note|invoice #|p\/o|loading ramp|window|house wash|water blast/i;
+function applyAllPending() {
+  var ss = SpreadsheetApp.getActive();
+  var pending = ss.getSheetByName('Pending');
+  var book = ss.getSheetByName('PriceBook');
+  if (pending.getLastRow() < 2) { ss.toast('Nothing pending.'); return; }
+  var data = pending.getRange(2, 1, pending.getLastRow() - 1, 13).getValues();
+  var bookRows = {};
+  if (book.getLastRow() >= 2) {
+    book.getRange(2, 1, book.getLastRow() - 1, 1).getValues().forEach(function (r, i) { if (r[0]) bookRows[String(r[0]).toLowerCase().trim()] = i + 2; });
+  }
+  var applied = 0;
+  for (var i = 0; i < data.length; i++) {
+    var row = data[i], item = row[4], unit = row[5], qty = Number(row[6]), price = Number(row[7]);
+    if (!item || !String(item).trim() || qty <= 0 || price <= 0 || SKIP_RE.test(String(item))) continue;
+    var priceEx = (row[8] === 'incl') ? Math.round(price / 1.15 * 100) / 100 : price;
+    var keyName = String(item).toLowerCase().trim();
+    var rec = [item, unit, priceEx, 'ex-GST', 30, row[1], new Date(), row[2]];
+    if (bookRows[keyName]) { rec[4] = book.getRange(bookRows[keyName], 5).getValue(); book.getRange(bookRows[keyName], 1, 1, 8).setValues([rec]); }
+    else { book.appendRow(rec); bookRows[keyName] = book.getLastRow(); }
+    applied++;
+  }
+  ss.toast(applied + ' price(s) applied from pending.', 'Rapid Refresh', 6);
 }
 
 function setup() {

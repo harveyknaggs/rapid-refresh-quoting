@@ -12,9 +12,9 @@ createRoot(document.getElementById('root')!).render(
   </React.StrictMode>,
 );
 
-// Register the service worker in production builds only (avoids dev caching surprises).
-if (import.meta.env.PROD && 'serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`).catch(() => {});
-  });
+// Service worker removed — with hashed asset filenames it could serve stale/blank pages after a deploy.
+// Actively unregister any previously-installed worker and clear its caches so returning users self-heal.
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then((rs) => rs.forEach((r) => r.unregister())).catch(() => {});
+  if (typeof caches !== 'undefined') caches.keys().then((ks) => ks.forEach((k) => caches.delete(k))).catch(() => {});
 }

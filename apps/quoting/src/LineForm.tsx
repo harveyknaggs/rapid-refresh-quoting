@@ -13,27 +13,28 @@ const UNIT_LABEL: Record<Unit, string> = {
 type Method = 'margin' | 'passthrough' | 'charge';
 type Measure = 'direct' | 'lw' | 'lwh';
 
-export function LineForm({ rateCard, onAdd, onCancel }: {
+export function LineForm({ rateCard, onAdd, onCancel, initial }: {
   rateCard: RateCardItem[];
   onAdd: (line: LineItem) => void;
   onCancel: () => void;
+  initial?: LineItem;
 }) {
   const [rateKey, setRateKey] = useState('');
-  const [type, setType] = useState<LineType>('material');
-  const [description, setDescription] = useState('');
-  const [unit, setUnit] = useState<Unit>('m2');
+  const [type, setType] = useState<LineType>(initial?.type ?? 'material');
+  const [description, setDescription] = useState(initial?.description ?? '');
+  const [unit, setUnit] = useState<Unit>(initial?.unit ?? 'm2');
   const [measure, setMeasure] = useState<Measure>('direct');
-  const [directQty, setDirectQty] = useState('');
+  const [directQty, setDirectQty] = useState(initial ? String(initial.quantity) : '');
   const [length, setLength] = useState('');
   const [width, setWidth] = useState('');
   const [depth, setDepth] = useState('');
   const [waste, setWaste] = useState(false);
   const [wastePct, setWastePct] = useState('10');
-  const [costDollars, setCostDollars] = useState('');
-  const [gstIncl, setGstIncl] = useState(false);
-  const [method, setMethod] = useState<Method>('margin');
-  const [marginRate, setMarginRate] = useState('0.40');
-  const [sellDollars, setSellDollars] = useState('');
+  const [costDollars, setCostDollars] = useState(initial && initial.costRateCents ? String(initial.costRateCents / 100) : '');
+  const [gstIncl, setGstIncl] = useState(initial?.costRateGstInclusive ?? false);
+  const [method, setMethod] = useState<Method>(initial ? (initial.pricing.method as Method) : 'margin');
+  const [marginRate, setMarginRate] = useState(initial && initial.pricing.method === 'margin' ? String(initial.pricing.rate) : '0.40');
+  const [sellDollars, setSellDollars] = useState(initial && initial.pricing.method === 'charge' ? String(initial.pricing.sellRateCents / 100) : '');
 
   const selected = rateCard.find((r) => r.id === rateKey);
 
@@ -76,7 +77,7 @@ export function LineForm({ rateCard, onAdd, onCancel }: {
         ? { method: 'charge' as const, sellRateCents: dollarsToCents(sellDollars) }
         : { method: 'passthrough' as const };
     const line: LineItem = {
-      id: ulid(), type, description: description || selected?.label || '', unit,
+      id: initial?.id ?? ulid(), type, description: description || selected?.label || '', unit,
       quantity, costRateCents, costRateGstInclusive: gstIncl, pricing,
       rateCardItemId: selected?.id ?? null, order: 0,
     };
@@ -96,7 +97,7 @@ export function LineForm({ rateCard, onAdd, onCancel }: {
 
   return (
     <div className="card" style={{ background: '#f8fafc' }}>
-      <h3>Add line</h3>
+      <h3>{initial ? 'Edit line' : 'Add line'}</h3>
 
       <label className="field">
         <span>From rate card (optional — prefills below)</span>
@@ -194,7 +195,7 @@ export function LineForm({ rateCard, onAdd, onCancel }: {
       {issues.map((i) => <div className="issue" key={i}>⚠ {i}</div>)}
 
       <div className="row" style={{ marginTop: 10 }}>
-        <button className="btn" disabled={issues.length > 0} onClick={() => onAdd({ ...built.line })}>Add line</button>
+        <button className="btn" disabled={issues.length > 0} onClick={() => onAdd({ ...built.line })}>{initial ? 'Save line' : 'Add line'}</button>
         <button className="btn secondary" onClick={onCancel}>Cancel</button>
       </div>
     </div>

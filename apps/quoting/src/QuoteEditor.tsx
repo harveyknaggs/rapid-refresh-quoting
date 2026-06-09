@@ -23,6 +23,7 @@ export function QuoteEditor({ quoteId, onBack, onViewDoc, onOpen }: {
   const [rateCard, setRateCard] = useState<RateCardItem[]>(() => seedRateCard());
   useEffect(() => { loadPriceBook().then((items) => { if (items && items.length) setRateCard(items); }); }, []);
   const [addingFor, setAddingFor] = useState<string | null>(null);
+  const [editing, setEditing] = useState<{ scopeId: string; lineId: string } | null>(null);
   const [actuals, setActuals] = useState<ActualEntry[]>([]);
   const [actualsOpen, setActualsOpen] = useState(false);
   const [desc, setDesc] = useState('');
@@ -56,6 +57,8 @@ export function QuoteEditor({ quoteId, onBack, onViewDoc, onOpen }: {
   };
   const deleteLine = (scopeId: string, lineId: string) =>
     setScopes(version.scopes.map((s) => (s.id === scopeId ? { ...s, lines: s.lines.filter((l) => l.id !== lineId) } : s)));
+  const replaceLine = (scopeId: string, line: any) =>
+    setScopes(version.scopes.map((s) => (s.id === scopeId ? { ...s, lines: s.lines.map((x) => (x.id === line.id ? { ...line, order: x.order } : x)) } : s)));
 
   const changeStatus = async (status: QuoteStatus) => { await repo.setStatus(version.id, status); await load(); };
   const newVersion = async () => { await repo.newVersionFrom(quoteId); await load(); };
@@ -123,11 +126,18 @@ export function QuoteEditor({ quoteId, onBack, onViewDoc, onOpen }: {
             <div style={{ marginTop: 10 }}>
               {scope.lines.length === 0 && <div className="muted small">No lines yet.</div>}
               {scope.lines.map((l) => {
+                if (editing && editing.scopeId === scope.id && editing.lineId === l.id) {
+                  return (
+                    <LineForm key={l.id} rateCard={rateCard} initial={l}
+                      onAdd={(line) => { replaceLine(scope.id, line); setEditing(null); }}
+                      onCancel={() => setEditing(null)} />
+                  );
+                }
                 const lp = priceScope({ ...scope, lines: [l] });
                 return (
                   <div className="line" key={l.id}>
-                    <div className="desc">
-                      <div>{l.description || '(no description)'}</div>
+                    <div className="desc" style={{ cursor: 'pointer' }} onClick={() => { setAddingFor(null); setEditing({ scopeId: scope.id, lineId: l.id }); }}>
+                      <div>{l.description || '(no description)'} <span className="muted small">✎</span></div>
                       <div className="qty">{l.quantity.toFixed(2)} {l.unit} · cost {fmt(lp.costCents)} · {pct(lp.marginPct)}</div>
                     </div>
                     <div className="sell">{fmt(lp.sellCents)}</div>

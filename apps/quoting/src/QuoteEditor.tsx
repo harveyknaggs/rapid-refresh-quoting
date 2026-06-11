@@ -144,7 +144,9 @@ export function QuoteEditor({ quoteId, onBack, onViewDoc, onOpen }: {
                   <div className="line" key={l.id}>
                     <div className="desc" style={{ cursor: 'pointer' }} onClick={() => { setAddingFor(null); setEditing({ scopeId: scope.id, lineId: l.id }); }}>
                       <div>{l.description || '(no description)'} <span className="muted small">✎</span></div>
-                      <div className="qty">{l.quantity.toFixed(2)} {l.unit} · cost {fmt(lp.costCents)} · {pct(lp.marginPct)}</div>
+                      <div className="qty">{l.quantity.toFixed(2)} {l.unit} · {l.pricing.method === 'charge' && lp.costCents === 0
+                        ? <>fixed rate · <span className="muted">cost not set</span></>
+                        : <>cost {fmt(lp.costCents)} · {pct(lp.marginPct)} margin</>}</div>
                     </div>
                     <div className="sell">{fmt(lp.sellCents)}</div>
                     <button className="x" title="Remove" onClick={() => deleteLine(scope.id, l.id)}>✕</button>

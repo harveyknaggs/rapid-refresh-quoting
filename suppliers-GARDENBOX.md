@@ -9,7 +9,13 @@ Garden Box website retail prices + Garden Box invoices in Gmail. Prices/discount
 - Garden Box is the **aggregate/paver** supplier — invoice **GB-229273 = $88.78** matches the
   "AP20 $88.78" line in the 35 Breens Rd quote. Fits the default mapping **pavers → Garden Box**.
 
-## Estimated trade discount: ~15–17% off retail  ⚠ CONFIRM
+## Approach (Roy, confirmed): use the listed online price as cost
+Exact discount isn't essential. **Use Garden Box's listed online price, stripped to ex-GST (÷1.15), as the
+cost.** This slightly overstates (Roy gets a small trade discount) so quotes stay conservative. The
+500×500 paver checks out: $18.50 retail → $16.09 ex-GST vs Roy's actual $15.28 (~5% under). Pavers
+400/500/600 are now wired into the rate card at listed ex-GST.
+
+## (Earlier) estimated trade discount ~15–17% off retail — superseded by "use listed price"
 - **Derived from one match:** Garden Box retail **Charcoal 500×500×30 paver = $18.50 each**; in the
   67a Aldwins quote you costed 500×500 pavers at **$15.28 each**. $15.28 ÷ $18.50 = **0.826 → ~17.4% off**.
 - This is a SINGLE data point — treat as a rough estimate. The real per-category discount should be

@@ -196,7 +196,7 @@ export function QuoteEditor({ quoteId, onBack, onViewDoc, onOpen }: {
 
       {/* Sticky live blended margin */}
       <div className={`margin-bar ${underTarget ? 'out' : ''}`}>
-        <div className="col"><span className="lab">Blended margin</span><span className="big">{pct(t.blendedMargin)}</span></div>
+        <div className="col"><span className="lab">Blended margin</span><span className="big">{pct(t.blendedMargin)}</span><span className="small muted">{fmt(t.profitCents)} profit{underTarget ? ' · under 35%' : ''}</span></div>
         <div className="col"><span className="lab">Sell (ex GST)</span><span><b>{fmt(t.sellCents)}</b></span></div>
         <div className="col"><span className="lab">GST</span><span>{fmt(t.gstCents)}</span></div>
         <div className="col"><span className="lab">Total incl</span><span><b>{fmt(t.grandTotalInclCents)}</b></span></div>

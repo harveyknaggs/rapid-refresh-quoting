@@ -15,7 +15,8 @@ export const SUPPLIERS = ['CLS', 'Garden Box', 'Frews', 'Fulton Hogan'] as const
  *  not to quarry aggregate (Frews, Fulton Hogan). */
 export const LEVY_EXEMPT_SUPPLIERS = ['Frews', 'Fulton Hogan'];
 
-/** Does the fuel levy apply to a material from this supplier? Yards → yes; quarries → no; unknown → yes. */
+/** Does the fuel levy apply to a material from this supplier? Yards → yes (ALL materials incl pavers);
+ *  quarries (Frews, Fulton Hogan) → no; unknown → yes. */
 export const leviesApply = (supplier?: string): boolean => !LEVY_EXEMPT_SUPPLIERS.includes(supplier ?? '');
 
 /** Default supplier for an item: explicit `defaultSupplier` wins, else pavers → Garden Box, else CLS. */

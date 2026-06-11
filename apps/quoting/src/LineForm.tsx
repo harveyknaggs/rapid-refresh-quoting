@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import {
-  ulid, type LineItem, type LineType, type Unit, type RateCardItem,
+  ulid, FUEL_LEVY, type LineItem, type LineType, type Unit, type RateCardItem,
 } from '@rapid-refresh/domain';
 import { computeLine, barkChipCost, isMarginOutsideBand } from '@rapid-refresh/pricing';
 import { fmt, pct, dollarsToCents, num } from './format.ts';
@@ -63,13 +63,12 @@ export function LineForm({ rateCard, onAdd, onCancel, initial }: {
     if (selected?.modifiers && (selected.modifiers.fuelLevy || selected.modifiers.deliveryPerLoadCents) && unit === 'm3' && quantity > 0) {
       const bark = barkChipCost(quantity, {
         baseRateCents: costRateCents,
-        fuelLevy: selected.modifiers.fuelLevy ?? 0,
+        fuelLevy: 0, // the pricing engine adds the 7% levy on material lines — don't double-count it here
         deliveryPerLoadCents: selected.modifiers.deliveryPerLoadCents ?? 0,
         capacityM3: selected.modifiers.capacityM3 ?? 1e9,
       });
       costRateCents = Math.round(bark.costCents / quantity);
-      const levyPct = (selected.modifiers.fuelLevy ?? 0) * 100;
-      note = `incl ${levyPct ? levyPct + '% levy + ' : ''}${fmt(bark.deliveryCents)} delivery (${bark.loads} load${bark.loads > 1 ? 's' : ''})`;
+      note = `incl ${fmt(bark.deliveryCents)} delivery (${bark.loads} load${bark.loads > 1 ? 's' : ''})`;
     }
     const pricing = method === 'margin'
       ? { method: 'margin' as const, rate: num(marginRate) }
@@ -86,7 +85,9 @@ export function LineForm({ rateCard, onAdd, onCancel, initial }: {
 
   const preview = computeLine({
     quantity: built.line.quantity, costRateCents: built.line.costRateCents,
-    costRateGstInclusive: built.line.costRateGstInclusive, pricing: built.line.pricing,
+    costRateGstInclusive: built.line.costRateGstInclusive,
+    fuelLevyPct: built.line.type === 'material' ? FUEL_LEVY : 0, // mirror the quote-level levy so the preview matches
+    pricing: built.line.pricing,
   });
 
   const issues: string[] = [];
@@ -171,15 +172,21 @@ export function LineForm({ rateCard, onAdd, onCancel, initial }: {
           </label>
         )}
         {method === 'charge' && (
-          <label className="field"><span>Sell rate $ / {UNIT_LABEL[unit]}</span>
+          <label className="field"><span>Sell rate — what you CHARGE ($ / {UNIT_LABEL[unit]})</span>
             <input className="input" inputMode="decimal" value={sellDollars} onChange={(e) => setSellDollars(e.target.value)} />
           </label>
         )}
       </div>
 
+      <div className="muted small" style={{ marginTop: -2 }}>
+        {method === 'margin' && 'Enter your COST below — the app adds the margin.'}
+        {method === 'charge' && 'Enter the SELL price you charge the client — the app shows the margin.'}
+        {method === 'passthrough' && 'Charged at COST (no margin added).'}
+      </div>
+
       {method !== 'charge' && (
         <div className="row tight">
-          <label className="field" style={{ flex: 1 }}><span>Cost rate $ / {UNIT_LABEL[unit]}</span>
+          <label className="field" style={{ flex: 1 }}><span>Cost rate — what you PAY ($ / {UNIT_LABEL[unit]})</span>
             <input className="input" inputMode="decimal" value={costDollars} onChange={(e) => setCostDollars(e.target.value)} />
           </label>
           <label className="row tight" style={{ marginTop: 14 }}><input type="checkbox" checked={gstIncl} onChange={(e) => setGstIncl(e.target.checked)} /> GST-incl (÷1.15)</label>
@@ -188,7 +195,7 @@ export function LineForm({ rateCard, onAdd, onCancel, initial }: {
 
       <div className="preview">
         <div className="row" style={{ justifyContent: 'space-between' }}>
-          <span className="muted small">Cost {fmt(preview.costCents)}{built.note ? ` · ${built.note}` : ''}</span>
+          <span className="muted small">Cost {fmt(preview.costCents)}{built.line.type === 'material' ? ' · incl 7% levy' : ''}{built.note ? ` · ${built.note}` : ''}</span>
           <span><b>Sell {fmt(preview.sellCents)}</b> · {pct(preview.effectiveMargin)}</span>
         </div>
       </div>

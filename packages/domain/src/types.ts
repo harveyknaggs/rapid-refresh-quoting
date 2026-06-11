@@ -23,6 +23,7 @@ export interface LineItem {
   costRateGstInclusive: boolean;  // supplier/Bunnings price → stripped ÷1.15 at compute time
   pricing: Pricing;               // margin | passthrough | charge
   rateCardItemId: Id | null;
+  supplier?: string;              // which supplier this cost came from (e.g. 'CLS', 'Garden Box')
   order: number;
 }
 
@@ -70,6 +71,14 @@ export interface Quote {
   updatedAt: string;
 }
 
+/** A supplier-specific cost for a rate-card item (multi-supplier pricing). */
+export interface SupplierCost {
+  supplier: string;             // e.g. 'CLS', 'Garden Box'
+  costRateCents: number;
+  costRateGstInclusive: boolean;
+  notes?: string;
+}
+
 /** Shared rate card — seeded as editable defaults, referenced by id from lines. */
 export interface RateCardItem {
   id: Id;
@@ -77,10 +86,11 @@ export interface RateCardItem {
   label: string;
   unit: Unit;
   type: LineType;
-  costRateCents: number | null;
+  costRateCents: number | null;        // primary/default cost (kept for back-compat)
   costRateGstInclusive: boolean;
   sellRateCents: number | null;        // for charge-method items
   defaultPricing: Pricing;
+  suppliers?: SupplierCost[];          // optional per-supplier costs; pick one at quote time
   modifiers?: { fuelLevy?: number; deliveryPerLoadCents?: number; capacityM3?: number };
   notes?: string;
   active: boolean;

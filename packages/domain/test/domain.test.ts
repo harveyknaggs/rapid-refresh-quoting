@@ -1,6 +1,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { ulid, deriveTitle, seedRateCard, priceQuoteVersion, priceScope, FUEL_LEVY } from '../src/index.ts';
+import {
+  ulid, deriveTitle, seedRateCard, priceQuoteVersion, priceScope, FUEL_LEVY,
+  defaultSupplierFor, resolveSupplierCost, suppliersFor,
+} from '../src/index.ts';
 
 test('ULID: 26 chars, unique, time-sortable', () => {
   const a = ulid();
@@ -57,4 +60,28 @@ test('seed labour is charged $65/hr on $37 cost (~43% margin, not 40% on cost)',
   assert.equal(labour?.costRateCents, 3700);
   assert.equal(labour?.defaultPricing.method, 'charge');
   if (labour?.defaultPricing.method === 'charge') assert.equal(labour.defaultPricing.sellRateCents, 6500);
+});
+
+test('multi-supplier: default mapping pavers→Garden Box, else CLS', () => {
+  assert.equal(defaultSupplierFor({ key: 'pavers', label: 'Pavers (supply)' }), 'Garden Box');
+  assert.equal(defaultSupplierFor({ key: 'bark_chip', label: 'Black Bark' }), 'CLS');
+});
+
+test('multi-supplier: resolveSupplierCost picks chosen supplier, falls back to primary', () => {
+  const item = {
+    id: 'i', key: 'arbor_mulch', label: 'Arbor Mulch', unit: 'm3', type: 'material',
+    costRateCents: 2600, costRateGstInclusive: false, sellRateCents: null,
+    defaultPricing: { method: 'margin', rate: 0.4 }, active: true,
+    suppliers: [
+      { supplier: 'CLS', costRateCents: 2600, costRateGstInclusive: false },
+      { supplier: 'Garden Box', costRateCents: 3100, costRateGstInclusive: false },
+    ],
+  } as any;
+  assert.equal(resolveSupplierCost(item, 'Garden Box').costRateCents, 3100);
+  assert.equal(resolveSupplierCost(item, 'CLS').costRateCents, 2600);
+  // default (no supplier given) → CLS for a non-paver item
+  assert.equal(resolveSupplierCost(item).supplier, 'CLS');
+  // unknown supplier → falls back to primary cost
+  assert.equal(resolveSupplierCost(item, 'Nope').costRateCents, 2600);
+  assert.deepEqual(suppliersFor(item).sort(), ['CLS', 'Garden Box']);
 });

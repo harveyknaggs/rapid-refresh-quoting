@@ -4,6 +4,7 @@
 export * from './ids.ts';
 export * from './types.ts';
 export * from './rate-card.ts';
+export * from './suppliers.ts';
 
 import { computeLine, computeScope, computeQuote, type Totals, type QuoteTotals } from '../../pricing/src/index.ts';
 import type { Scope, QuoteVersion } from './types.ts';

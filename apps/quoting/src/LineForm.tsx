@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import {
-  ulid, FUEL_LEVY, type LineItem, type LineType, type Unit, type RateCardItem,
+  ulid, FUEL_LEVY, suppliersFor, resolveSupplierCost, defaultSupplierFor,
+  type LineItem, type LineType, type Unit, type RateCardItem,
 } from '@rapid-refresh/domain';
 import { computeLine, barkChipCost, isMarginOutsideBand } from '@rapid-refresh/pricing';
 import { fmt, pct, dollarsToCents, num } from './format.ts';
@@ -35,6 +36,7 @@ export function LineForm({ rateCard, onAdd, onCancel, initial }: {
   const [method, setMethod] = useState<Method>(initial ? (initial.pricing.method as Method) : 'margin');
   const [marginRate, setMarginRate] = useState(initial && initial.pricing.method === 'margin' ? String(initial.pricing.rate) : '0.40');
   const [sellDollars, setSellDollars] = useState(initial && initial.pricing.method === 'charge' ? String(initial.pricing.sellRateCents / 100) : '');
+  const [supplier, setSupplier] = useState<string>(initial?.supplier ?? '');
 
   const selected = rateCard.find((r) => r.id === rateKey);
 
@@ -45,11 +47,23 @@ export function LineForm({ rateCard, onAdd, onCancel, initial }: {
     setType(it.type);
     setUnit(it.unit);
     setDescription(it.label);
-    setGstIncl(it.costRateGstInclusive);
-    if (it.costRateCents != null) setCostDollars((it.costRateCents / 100).toString());
+    const sup = defaultSupplierFor(it);
+    setSupplier(sup);
+    const rc = resolveSupplierCost(it, sup);
+    setGstIncl(rc.costRateGstInclusive);
+    if (rc.costRateCents != null) setCostDollars((rc.costRateCents / 100).toString());
     if (it.defaultPricing.method === 'margin') { setMethod('margin'); setMarginRate(String(it.defaultPricing.rate)); }
     else if (it.defaultPricing.method === 'charge') { setMethod('charge'); setSellDollars((it.defaultPricing.sellRateCents / 100).toString()); }
     else setMethod('passthrough');
+  };
+
+  // Switch supplier on the selected rate-card item → repoint the cost.
+  const chooseSupplier = (sup: string) => {
+    setSupplier(sup);
+    if (!selected) return;
+    const rc = resolveSupplierCost(selected, sup);
+    setGstIncl(rc.costRateGstInclusive);
+    if (rc.costRateCents != null) setCostDollars((rc.costRateCents / 100).toString());
   };
 
   const rawQty = measure === 'lw' ? num(length) * num(width)
@@ -78,10 +92,10 @@ export function LineForm({ rateCard, onAdd, onCancel, initial }: {
     const line: LineItem = {
       id: initial?.id ?? ulid(), type, description: description || selected?.label || '', unit,
       quantity, costRateCents, costRateGstInclusive: gstIncl, pricing,
-      rateCardItemId: selected?.id ?? null, order: 0,
+      rateCardItemId: selected?.id ?? null, supplier: supplier || undefined, order: 0,
     };
     return { line, note };
-  }, [costDollars, selected, unit, quantity, method, marginRate, sellDollars, type, description, gstIncl]);
+  }, [costDollars, selected, unit, quantity, method, marginRate, sellDollars, type, description, gstIncl, supplier]);
 
   const preview = computeLine({
     quantity: built.line.quantity, costRateCents: built.line.costRateCents,
@@ -107,6 +121,14 @@ export function LineForm({ rateCard, onAdd, onCancel, initial }: {
           {rateCard.filter((r) => r.active).map((r) => <option key={r.id} value={r.id}>{r.label}</option>)}
         </select>
       </label>
+
+      {selected && suppliersFor(selected).length > 1 && (
+        <label className="field"><span>Supplier</span>
+          <select className="input" value={supplier} onChange={(e) => chooseSupplier(e.target.value)}>
+            {suppliersFor(selected).map((s) => <option key={s} value={s}>{s}</option>)}
+          </select>
+        </label>
+      )}
 
       <div className="grid2">
         <label className="field"><span>Type</span>

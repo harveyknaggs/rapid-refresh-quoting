@@ -17,6 +17,16 @@ Garden Box website retail prices + Garden Box invoices in Gmail. Prices/discount
   invoice PDFs — the existing invoice pipeline can extract those). **Harvey to confirm the % (and whether
   it differs by category).**
 
+## Deriving discount from invoices — what the Gmail invoices give
+Garden Box invoices (Xero) **do** contain itemised lines, ex-GST. Example GB-232671 (111 Slater St):
+`Topcourse AP20 [SCOOP] $121.14` · `Delivery Zone 2 [1–2m³] $68.50` · subtotal $164.91 + GST = $189.64.
+**But the email shows line TOTALS, not quantities** — so a clean unit-price/discount needs the qty, which
+is in the PDF (the invoice pipeline parses those). Options to nail per-product discount:
+1. Use the existing invoice pipeline (reads PDF line items incl qty) — best for accuracy.
+2. Roy gives the discount per product/category.
+3. Keep the ~17% paver figure (from Roy's own 500×500 costing) as a stopgap.
+**Note:** Garden Box also supplies AP20 (it's a yard) → its AP20 IS levied (7%); Frews AP20 is not.
+
 ## GST  ⚠ CONFIRM
 - Website prices are a retail Shopify store → almost certainly **GST-inclusive**. The $15.28 trade figure
   and the Xero invoice totals also appear GST-inclusive. If so, Garden Box costs should be entered

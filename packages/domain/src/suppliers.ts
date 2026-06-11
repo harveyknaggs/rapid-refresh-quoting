@@ -8,7 +8,7 @@ import type { RateCardItem, SupplierCost } from './types.ts';
 export const DEFAULT_SUPPLIER = 'CLS';
 
 /** Known suppliers (for pickers). Extend as more are added. */
-export const SUPPLIERS = ['CLS', 'Garden Box'] as const;
+export const SUPPLIERS = ['CLS', 'Garden Box', 'Frews', 'Fulton Hogan'] as const;
 
 /** Default supplier for an item: pavers → Garden Box, everything else → CLS. */
 export const defaultSupplierFor = (item: Pick<RateCardItem, 'key' | 'label'>): string =>

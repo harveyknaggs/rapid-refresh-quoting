@@ -63,7 +63,8 @@ Source = the claude.ai "quoting" project export (87 chats). Confidence noted per
 | 19mm drainage chip | **$102/m³** | +20–30% | +10% wastage on volume. 76 Tuahiwi |
 | White stone | $160/m³ | +40% | Blackison/Oxford |
 | Amuri stone | $160/m³ + 10% fuel = **$176/m³** | — | Outdoor-cleaning job |
-| AP20 / crusher dust | **$90/m³** (GAP20 basecourse $80/m³) | +margin | lay ~2 hrs/13 m². AP20-laying job |
+| AP20 / GAP20 basecourse | **$44.80/m³ (Frews ex-GST)** | +margin | AP40 $42.50, AP65 $45.60. CLS = retail−10%; Fulton Hogan similar. lay ~2 hrs/13 m² |
+| Crusher dust (AP5) | **$72/m³ (Frews)** | +margin | Garden Box AP5 $38.35 (confirm m³ vs scoop) |
 | Pavers — varies by type | $15.28 (500×500) · $37.17 · $48.93 · **$119.90/m² premium** | per-paver +40% | + mortar $150–200; old blanket $220/m² too low for premium |
 | Retaining wall (supply & install, to ~1.2 m) | — | **$280/lm** | Retaining-and-paving job |
 | Retaining timber (100×100 H5 post) | **$18/lm** | — | Retaining-timber job |
@@ -97,7 +98,15 @@ Source = the claude.ai "quoting" project export (87 chats). Confidence noted per
 - **CLS items not on the wholesale list (aggregate, AP20, stone, etc.) = retail less 10%.**
 - Materials/labour: 40% true margin on cost. Fixed-rate items already include margin.
 
+## Suppliers
+- **CLS** (bulk bark/soil/weedmat — wholesale, ex-GST) → `suppliers-CLS.md`
+- **Garden Box** (pavers + aggregate; ~17% trade discount, DRAFT) → `suppliers-GARDENBOX.md`
+- **Frews Quarries** (AP20/aggregate + dumping, ex-GST) → `suppliers-FREWS.md`
+- **Fulton Hogan** (aggregate — list TBD)
+Default supplier per item: pavers → Garden Box, else CLS (override per item, e.g. AP20 → Frews).
+
 ## Still to confirm / fill
-- Deck-stain: Harvey to double-check $32 is the sell; capture oil $/litre for true cost.
-- AP20 / aggregate retail base (cost = CLS retail − 10%); pin the standard $/m³.
-- More supplier lists: stone/aggregate yard, Hydroturf, timber merchant.
+- Deck-stain: confirmed SELL; still want oil $/litre for true cost.
+- Fulton Hogan aggregate list; CLS AP20 retail (cost = retail − 10%).
+- Garden Box discount % per category + GST basis (DRAFT ~17%).
+- More: Hydroturf (lawn), timber merchant.

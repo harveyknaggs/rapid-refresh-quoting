@@ -47,10 +47,19 @@ export const seedRateCard = (): RateCardItem[] => [
     notes: '$160/m³. Handling ~1 hr/m³ (add a labour line).', active: true }),
   item({
     key: 'ap20', label: 'AP20 / GAP20 basecourse', unit: 'm3', type: 'material',
-    costRateCents: 9000, costRateGstInclusive: false, sellRateCents: null,
+    costRateCents: 4480, costRateGstInclusive: false, sellRateCents: null,
     defaultPricing: { method: 'margin', rate: 0.40 },
+    suppliers: [{ supplier: 'Frews', costRateCents: 4480, costRateGstInclusive: false, notes: '$44.80/m³ ex-GST (Belfast/Wasteport)' }],
     modifiers: { fuelLevy: LEVY, deliveryPerLoadCents: 6000, capacityM3: 2 / 3 },
-    notes: '~$90/m³ (GAP20 $80). Aggregate not on CLS list = retail −10%. Heavier: ~0.667 m³/load.', active: true,
+    notes: 'Frews $44.80/m³ (AP40 $42.50, AP65 $45.60). Fulton Hogan similar; CLS = retail −10%. Heavier: ~0.667 m³/load.', active: true,
+  }),
+  item({
+    key: 'crusher_dust', label: 'Crusher dust (AP5)', unit: 'm3', type: 'material',
+    costRateCents: 7200, costRateGstInclusive: false, sellRateCents: null,
+    defaultPricing: { method: 'margin', rate: 0.40 },
+    suppliers: [{ supplier: 'Frews', costRateCents: 7200, costRateGstInclusive: false }],
+    modifiers: { fuelLevy: LEVY, deliveryPerLoadCents: 6000, capacityM3: 2 / 3 },
+    notes: 'Frews AP5 $72/m³ ex-GST. Garden Box AP5 $38.35 (confirm per m³ vs scoop).', active: true,
   }),
 
   // ---- Soils & compost (CLS ex-GST, /m³) ----
@@ -126,5 +135,5 @@ export const seedRateCard = (): RateCardItem[] => [
     defaultPricing: { method: 'passthrough' }, notes: '$50–200/load (commonly $80–120).', active: true }),
   item({ key: 'dumping', label: 'Dumping / green waste', unit: 'flat', type: 'other',
     costRateCents: 15000, costRateGstInclusive: false, sellRateCents: null,
-    defaultPricing: { method: 'margin', rate: 0.40 }, notes: 'Small $25–150; big jobs $450–500. GST incl → strip.', active: true }),
+    defaultPricing: { method: 'margin', rate: 0.40 }, notes: 'Frews per tonne ex-GST: greenwaste $160–175, hardfill/soil $40–150, stumps $210–220, mixed C&D ~$291–297. Estimate load weight (greenwaste ~0.3–0.5 t/m³, soil/hardfill ~1.5 t/m³).', active: true }),
 ];

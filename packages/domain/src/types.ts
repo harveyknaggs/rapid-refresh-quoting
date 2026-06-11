@@ -91,6 +91,7 @@ export interface RateCardItem {
   sellRateCents: number | null;        // for charge-method items
   defaultPricing: Pricing;
   suppliers?: SupplierCost[];          // optional per-supplier costs; pick one at quote time
+  defaultSupplier?: string;            // overrides the rule-based default (e.g. AP20 → 'Frews')
   modifiers?: { fuelLevy?: number; deliveryPerLoadCents?: number; capacityM3?: number };
   notes?: string;
   active: boolean;

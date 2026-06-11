@@ -10,9 +10,19 @@ export const DEFAULT_SUPPLIER = 'CLS';
 /** Known suppliers (for pickers). Extend as more are added. */
 export const SUPPLIERS = ['CLS', 'Garden Box', 'Frews', 'Fulton Hogan'] as const;
 
-/** Default supplier for an item: pavers → Garden Box, everything else → CLS. */
-export const defaultSupplierFor = (item: Pick<RateCardItem, 'key' | 'label'>): string =>
-  /paver|paving/i.test(`${item.key} ${item.label}`) ? 'Garden Box' : DEFAULT_SUPPLIER;
+/** Quarry suppliers — their aggregate is NOT subject to the landscaping-yard fuel levy.
+ *  The 7% levy applies to materials from landscaping yards (Dyers Road, CLS, Garden Box, Mainscape…),
+ *  not to quarry aggregate (Frews, Fulton Hogan). */
+export const LEVY_EXEMPT_SUPPLIERS = ['Frews', 'Fulton Hogan'];
+
+/** Does the fuel levy apply to a material from this supplier? Yards → yes; quarries → no; unknown → yes. */
+export const leviesApply = (supplier?: string): boolean => !LEVY_EXEMPT_SUPPLIERS.includes(supplier ?? '');
+
+/** Default supplier for an item: explicit `defaultSupplier` wins, else pavers → Garden Box, else CLS. */
+export const defaultSupplierFor = (item: Pick<RateCardItem, 'key' | 'label'> & { defaultSupplier?: string }): string => {
+  if (item.defaultSupplier) return item.defaultSupplier;
+  return /paver|paving/i.test(`${item.key} ${item.label}`) ? 'Garden Box' : DEFAULT_SUPPLIER;
+};
 
 export interface ResolvedCost {
   supplier: string;

@@ -62,9 +62,21 @@ test('seed labour is charged $65/hr on $37 cost (~43% margin, not 40% on cost)',
   if (labour?.defaultPricing.method === 'charge') assert.equal(labour.defaultPricing.sellRateCents, 6500);
 });
 
-test('multi-supplier: default mapping pavers→Garden Box, else CLS', () => {
+test('multi-supplier: default mapping pavers→Garden Box, else CLS, explicit defaultSupplier wins', () => {
   assert.equal(defaultSupplierFor({ key: 'pavers', label: 'Pavers (supply)' }), 'Garden Box');
   assert.equal(defaultSupplierFor({ key: 'bark_chip', label: 'Black Bark' }), 'CLS');
+  assert.equal(defaultSupplierFor({ key: 'ap20', label: 'AP20', defaultSupplier: 'Frews' }), 'Frews');
+});
+
+test('fuel levy: quarry suppliers (Frews) are exempt; yards are levied', () => {
+  const scope = {
+    id: 's', title: '', description: '', order: 0, lines: [
+      { id: 'a', type: 'material', description: 'AP20', unit: 'm3', quantity: 1, costRateCents: 4480, costRateGstInclusive: false, supplier: 'Frews', pricing: { method: 'margin', rate: 0.40 }, rateCardItemId: null, order: 0 },
+      { id: 'b', type: 'material', description: 'Bark', unit: 'm3', quantity: 1, costRateCents: 9100, costRateGstInclusive: false, supplier: 'CLS', pricing: { method: 'margin', rate: 0.40 }, rateCardItemId: null, order: 1 },
+    ],
+  };
+  // Frews AP20 unlevied ($44.80); CLS bark +7% ($91 → $97.37) → scope cost $142.17
+  assert.equal(priceScope(scope as any).costCents, 4480 + 9737);
 });
 
 test('multi-supplier: resolveSupplierCost picks chosen supplier, falls back to primary', () => {

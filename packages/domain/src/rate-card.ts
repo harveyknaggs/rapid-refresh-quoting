@@ -48,18 +48,18 @@ export const seedRateCard = (): RateCardItem[] => [
   item({
     key: 'ap20', label: 'AP20 / GAP20 basecourse', unit: 'm3', type: 'material',
     costRateCents: 4480, costRateGstInclusive: false, sellRateCents: null,
-    defaultPricing: { method: 'margin', rate: 0.40 },
+    defaultPricing: { method: 'margin', rate: 0.40 }, defaultSupplier: 'Frews',
     suppliers: [{ supplier: 'Frews', costRateCents: 4480, costRateGstInclusive: false, notes: '$44.80/m³ ex-GST (Belfast/Wasteport)' }],
-    modifiers: { fuelLevy: LEVY, deliveryPerLoadCents: 6000, capacityM3: 2 / 3 },
-    notes: 'Frews $44.80/m³ (AP40 $42.50, AP65 $45.60). Fulton Hogan similar; CLS = retail −10%. Heavier: ~0.667 m³/load.', active: true,
+    modifiers: { deliveryPerLoadCents: 6000, capacityM3: 2 / 3 },
+    notes: 'Frews $44.80/m³ (AP40 $42.50, AP65 $45.60). Quarry → NO fuel levy. Fulton Hogan similar; CLS = retail −10%. Heavier: ~0.667 m³/load.', active: true,
   }),
   item({
     key: 'crusher_dust', label: 'Crusher dust (AP5)', unit: 'm3', type: 'material',
     costRateCents: 7200, costRateGstInclusive: false, sellRateCents: null,
-    defaultPricing: { method: 'margin', rate: 0.40 },
+    defaultPricing: { method: 'margin', rate: 0.40 }, defaultSupplier: 'Frews',
     suppliers: [{ supplier: 'Frews', costRateCents: 7200, costRateGstInclusive: false }],
-    modifiers: { fuelLevy: LEVY, deliveryPerLoadCents: 6000, capacityM3: 2 / 3 },
-    notes: 'Frews AP5 $72/m³ ex-GST. Garden Box AP5 $38.35 (confirm per m³ vs scoop).', active: true,
+    modifiers: { deliveryPerLoadCents: 6000, capacityM3: 2 / 3 },
+    notes: 'Frews AP5 $72/m³ ex-GST. Quarry → NO fuel levy. Garden Box AP5 $38.35 (yard → levied; confirm per m³ vs scoop).', active: true,
   }),
 
   // ---- Soils & compost (CLS ex-GST, /m³) ----

@@ -27,7 +27,9 @@ const SYSTEM = [
   '  pricing {"method":"charge","sellRateCents":6500} — labour is charged at the standard $65/hr.',
   '- MATERIALS bought & carted (bark, chip, soil, stone, AP20, timber, pavers, weedmat, plants):',
   '  pricing {"method":"margin","rate":R} on the price-book cost. R = item default, else 0.40;',
-  '  loose bulk (bark/chip/soil/aggregate) often 0.30. Enter BASE cost — the app adds the 7% levy itself.',
+  '  loose bulk (bark/chip/soil) often 0.30. Enter BASE cost — the app adds the fuel levy itself.',
+  '- FUEL LEVY is by supplier: 7% applies to landscaping-YARD materials (CLS, Garden Box, Dyers Road, Mainscape).',
+  '  QUARRY aggregate (AP20/AP40/GAP/basecourse/crusher dust) is EXEMPT — set "supplier":"Frews" on those lines.',
   '- FIXED-RATE items (ready lawn, hydroseed, deck staining $32/m², timber edging $33.33/lm, turf,',
   '  waterblast $4.50/m², house wash, retaining $280/lm, lawn prep): pricing {"method":"charge","sellRateCents":X} from the price book.',
   '- GST: costRateGstInclusive true ONLY if the price book marks the item GST-inclusive (CLS wholesale = false; Bunnings/retail = true).',
@@ -38,7 +40,7 @@ const SYSTEM = [
   '- State assumptions briefly in the line description rather than asking questions.',
   '',
   'Return STRICT JSON only (no markdown), shape:',
-  '{"scopes":[{"title":string,"description":string,"lines":[{"type":"material|labour|other","description":string,"unit":string,"quantity":number,"costRateCents":integer,"costRateGstInclusive":boolean,"pricing":{"method":"margin","rate":number}|{"method":"charge","sellRateCents":integer}|{"method":"passthrough"}}]}]}',
+  '{"scopes":[{"title":string,"description":string,"lines":[{"type":"material|labour|other","description":string,"unit":string,"quantity":number,"costRateCents":integer,"costRateGstInclusive":boolean,"supplier":string(optional, e.g. "Frews" for quarry aggregate),"pricing":{"method":"margin","rate":number}|{"method":"charge","sellRateCents":integer}|{"method":"passthrough"}}]}]}',
 ].join('\n');
 
 const UNITS: Unit[] = ['m2', 'm3', 'lineal_m', 'each', 'hour', 'load', 'flat'];
@@ -67,7 +69,7 @@ function toScopes(parsed: any): Scope[] {
       id: ulid(), type: normType(l.type), description: l.description || '', unit: normUnit(l.unit),
       quantity: Number(l.quantity) || 0, costRateCents: Math.round(Number(l.costRateCents) || 0),
       costRateGstInclusive: !!l.costRateGstInclusive, pricing: normPricing(l.pricing),
-      rateCardItemId: null, order: li,
+      rateCardItemId: null, supplier: l.supplier || undefined, order: li,
     })),
   }));
 }

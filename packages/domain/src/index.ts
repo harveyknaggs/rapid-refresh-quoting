@@ -7,6 +7,7 @@ export * from './rate-card.ts';
 export * from './suppliers.ts';
 
 import { computeLine, computeScope, computeQuote, type Totals, type QuoteTotals } from '../../pricing/src/index.ts';
+import { leviesApply } from './suppliers.ts';
 import type { Scope, QuoteVersion } from './types.ts';
 
 /** Quotes are titled: "[Client Name] – [Address] – Quote". */
@@ -22,7 +23,7 @@ export const priceScope = (scope: Scope): Totals =>
     quantity: l.quantity,
     costRateCents: l.costRateCents,
     costRateGstInclusive: l.costRateGstInclusive,
-    fuelLevyPct: l.type === 'material' ? FUEL_LEVY : 0, // levy on materials only
+    fuelLevyPct: l.type === 'material' && leviesApply(l.supplier) ? FUEL_LEVY : 0, // yard materials only (quarries exempt)
     pricing: l.pricing,
   })));
 

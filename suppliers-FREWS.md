@@ -8,7 +8,12 @@ Roy buys AP20/aggregate cheaper here (and at Fulton Hogan) than CLS. Pairs with 
 - **Belfast Supply Yard** — 85 Factory Rd. Mon–Fri 7–5, Sat 7–12 (fuller sales range).
 - **Wasteport** — 51 Chapmans Rd, Hillsborough. Ph 03 376 4435. Mon–Fri 7–5.
 
-## Sales (aggregate) — use the $/m³ column
+## ⚠ Prices are per TONNE — convert to $/m³ before using
+Frews & Fulton Hogan quote **$/tonne**. The app quotes in **m³**, so always convert:
+**$/m³ = $/tonne × density (t/m³)**. The $/m³ column below is already converted — use it, not the $/t figure.
+(e.g. AP20 $28/t × 1.6 = $44.80/m³.) When Fulton Hogan's list arrives, convert the same way.
+
+## Sales (aggregate) — use the **$/m³** column (already converted from $/tonne)
 | Product | $/tonne | **$/m³** | Density t/m³ | Yard |
 |---|---|---|---|---|
 | AP20 | $28.00 | **$44.80** | 1.6 | both |

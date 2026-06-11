@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { ulid, deriveTitle, seedRateCard, priceQuoteVersion } from '../src/index.ts';
+import { ulid, deriveTitle, seedRateCard, priceQuoteVersion, priceScope, FUEL_LEVY } from '../src/index.ts';
 
 test('ULID: 26 chars, unique, time-sortable', () => {
   const a = ulid();
@@ -38,4 +38,23 @@ test('priceQuoteVersion runs every line through the pricing layer', () => {
   assert.equal(total.sellCents, 156300);
   assert.equal(total.gstCents, 23445);                 // 15% of $1563.00
   assert.equal(total.grandTotalInclCents, 179745);     // $1797.45 incl
+});
+
+test('fuel levy: +7% on MATERIAL lines via priceScope, not on labour/other', () => {
+  const scope = {
+    id: 's', title: '', description: '', order: 0, lines: [
+      { id: 'm', type: 'material', description: 'Bark', unit: 'm3', quantity: 1, costRateCents: 10000, costRateGstInclusive: false, pricing: { method: 'margin', rate: 0.40 }, rateCardItemId: null, order: 0 },
+      { id: 'l', type: 'labour', description: 'Crew', unit: 'hour', quantity: 1, costRateCents: 3700, costRateGstInclusive: false, pricing: { method: 'margin', rate: 0.40 }, rateCardItemId: null, order: 1 },
+    ],
+  };
+  assert.equal(FUEL_LEVY, 0.07);
+  // material $100 → +7% = $107; labour $37 unlevied → scope cost $144.00
+  assert.equal(priceScope(scope as any).costCents, 10700 + 3700);
+});
+
+test('seed labour is charged $65/hr on $37 cost (~43% margin, not 40% on cost)', () => {
+  const labour = seedRateCard().find((i) => i.key === 'labour');
+  assert.equal(labour?.costRateCents, 3700);
+  assert.equal(labour?.defaultPricing.method, 'charge');
+  if (labour?.defaultPricing.method === 'charge') assert.equal(labour.defaultPricing.sellRateCents, 6500);
 });

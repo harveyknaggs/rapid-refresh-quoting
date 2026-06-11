@@ -5,7 +5,7 @@ import {
   ulid, nowIso,
   type Id, type Quote, type QuoteVersion, type QuoteStatus, type Scope, type ActualEntry,
 } from '../../domain/src/index.ts';
-import type { QuoteRepository, NewQuoteInput, QuoteFilter } from './repository.ts';
+import type { QuoteRepository, NewQuoteInput, QuoteFilter, QuoteDetailsPatch } from './repository.ts';
 
 const DB_NAME = 'rr-quoting';
 const DB_VERSION = 1;
@@ -72,6 +72,7 @@ export class IndexedDbQuoteRepository implements QuoteRepository {
     const quote: Quote = {
       id: quoteId, quoteNumber: number, clientId: input.clientId, propertyId: input.propertyId,
       clientName: input.clientName, address: input.address,
+      clientPhone: input.clientPhone, clientEmail: input.clientEmail, siteNotes: input.siteNotes,
       currentVersionId: versionId, acceptedVersionId: null, createdAt: ts, updatedAt: ts,
     };
     const tx = await this.#tx(['quotes', 'versions'], 'readwrite');
@@ -82,6 +83,24 @@ export class IndexedDbQuoteRepository implements QuoteRepository {
   async getQuote(id: Id): Promise<Quote | null> {
     const tx = await this.#tx(['quotes'], 'readonly');
     return (await req<Quote | undefined>(tx.objectStore('quotes').get(id))) ?? null;
+  }
+
+  async updateQuoteDetails(id: Id, patch: QuoteDetailsPatch): Promise<Quote> {
+    const tx = await this.#tx(['quotes'], 'readwrite');
+    const q = await req<Quote | undefined>(tx.objectStore('quotes').get(id));
+    if (!q) throw new Error(`Unknown quote ${id}`);
+    Object.assign(q, patch, { updatedAt: nowIso() });
+    await req(tx.objectStore('quotes').put(q));
+    return q;
+  }
+
+  async deleteQuote(id: Id): Promise<void> {
+    const tx = await this.#tx(['quotes', 'versions', 'actuals'], 'readwrite');
+    await req(tx.objectStore('quotes').delete(id));
+    for (const store of ['versions', 'actuals']) {
+      const keys = await req<IDBValidKey[]>(tx.objectStore(store).index('byQuote').getAllKeys(id));
+      await Promise.all(keys.map((k) => req(tx.objectStore(store).delete(k))));
+    }
   }
 
   async listQuotes(filter: QuoteFilter = {}): Promise<Quote[]> {

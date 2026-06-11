@@ -33,8 +33,9 @@ test('priceQuoteVersion runs every line through the pricing layer', () => {
     }],
   };
   const { scopes, total } = priceQuoteVersion(version);
-  assert.equal(scopes[0].sellCents, 49300 + 100000);   // $493 labour + $1000 timber
-  assert.equal(total.sellCents, 149300);
-  assert.equal(total.gstCents, 22395);                 // 15% of $1493.00
-  assert.equal(total.grandTotalInclCents, 171695);     // $1716.95 incl
+  // Timber is a MATERIAL → +7% fuel levy: cost $600 → $642, sell $642/0.60 = $1070.
+  assert.equal(scopes[0].sellCents, 49300 + 107000);   // $493 labour + $1070 timber (levied)
+  assert.equal(total.sellCents, 156300);
+  assert.equal(total.gstCents, 23445);                 // 15% of $1563.00
+  assert.equal(total.grandTotalInclCents, 179745);     // $1797.45 incl
 });

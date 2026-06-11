@@ -5,7 +5,7 @@ import {
   ulid, nowIso,
   type Id, type Quote, type QuoteVersion, type QuoteStatus, type Scope, type ActualEntry,
 } from '../../domain/src/index.ts';
-import type { QuoteRepository, NewQuoteInput, QuoteFilter } from './repository.ts';
+import type { QuoteRepository, NewQuoteInput, QuoteFilter, QuoteDetailsPatch } from './repository.ts';
 
 const DAY = 86_400_000;
 
@@ -36,6 +36,7 @@ export class InMemoryQuoteRepository implements QuoteRepository {
       id: quoteId, quoteNumber: this.#nextNumber++,
       clientId: input.clientId, propertyId: input.propertyId,
       clientName: input.clientName, address: input.address,
+      clientPhone: input.clientPhone, clientEmail: input.clientEmail, siteNotes: input.siteNotes,
       currentVersionId: versionId, acceptedVersionId: null, createdAt: ts, updatedAt: ts,
     };
     this.#quotes.set(quoteId, quote);
@@ -46,6 +47,19 @@ export class InMemoryQuoteRepository implements QuoteRepository {
   async getQuote(id: Id): Promise<Quote | null> {
     const q = this.#quotes.get(id);
     return q ? { ...q } : null;
+  }
+
+  async updateQuoteDetails(id: Id, patch: QuoteDetailsPatch): Promise<Quote> {
+    const q = this.#quotes.get(id);
+    if (!q) throw new Error(`Unknown quote ${id}`);
+    Object.assign(q, patch, { updatedAt: nowIso() });
+    return { ...q };
+  }
+
+  async deleteQuote(id: Id): Promise<void> {
+    this.#quotes.delete(id);
+    for (const [vid, v] of this.#versions) if (v.quoteId === id) this.#versions.delete(vid);
+    this.#actuals = this.#actuals.filter((a) => a.quoteId !== id);
   }
 
   async listQuotes(filter: QuoteFilter = {}): Promise<Quote[]> {

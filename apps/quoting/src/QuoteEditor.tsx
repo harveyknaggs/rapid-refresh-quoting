@@ -3,6 +3,7 @@ import {
   ulid, deriveTitle, priceScope, priceQuoteVersion, seedRateCard,
   type Quote, type QuoteVersion, type QuoteStatus, type Scope, type RateCardItem, type ActualEntry,
 } from '@rapid-refresh/domain';
+import type { QuoteDetailsPatch } from '@rapid-refresh/data';
 import { sensitivity, reconcile } from '@rapid-refresh/pricing';
 import { repo } from './repo.ts';
 import { loadPriceBook } from './priceBook.ts';
@@ -103,6 +104,11 @@ export function QuoteEditor({ quoteId, onBack, onViewDoc, onOpen }: {
         </div>
       </div>
 
+      <DetailsPanel
+        quote={quote}
+        onSave={async (patch) => { const updated = await repo.updateQuoteDetails(quote.id, patch); setQuote(updated); }}
+      />
+
       <div className="card">
         <h3>✨ Describe the job</h3>
         <p className="muted small">Type it in plain English — it builds priced scopes &amp; lines you can tweak.</p>
@@ -194,6 +200,62 @@ export function QuoteEditor({ quoteId, onBack, onViewDoc, onOpen }: {
         <div className="col"><span className="lab">Total incl</span><span><b>{fmt(t.grandTotalInclCents)}</b></span></div>
       </div>
     </>
+  );
+}
+
+// Client & property capture. Cached on the quote now; CRM/properties modules become the source of truth later.
+function DetailsPanel({ quote, onSave }: { quote: Quote; onSave: (patch: QuoteDetailsPatch) => Promise<void> }) {
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState({
+    clientName: quote.clientName, address: quote.address,
+    clientPhone: quote.clientPhone ?? '', clientEmail: quote.clientEmail ?? '', siteNotes: quote.siteNotes ?? '',
+  });
+  const [saved, setSaved] = useState(false);
+
+  // Re-sync when switching to a different quote.
+  useEffect(() => {
+    setForm({
+      clientName: quote.clientName, address: quote.address,
+      clientPhone: quote.clientPhone ?? '', clientEmail: quote.clientEmail ?? '', siteNotes: quote.siteNotes ?? '',
+    });
+  }, [quote.id]);
+
+  const set = (k: keyof typeof form) => (e: { target: { value: string } }) => { setForm((f) => ({ ...f, [k]: e.target.value })); setSaved(false); };
+  const save = async () => {
+    await onSave({
+      clientName: form.clientName.trim() || quote.clientName,
+      address: form.address.trim(),
+      clientPhone: form.clientPhone.trim() || undefined,
+      clientEmail: form.clientEmail.trim() || undefined,
+      siteNotes: form.siteNotes.trim() || undefined,
+    });
+    setSaved(true);
+  };
+
+  return (
+    <div className="card">
+      <div className="row" style={{ justifyContent: 'space-between' }}>
+        <h3 style={{ margin: 0 }}>Client &amp; property</h3>
+        <button className="btn secondary sm" onClick={() => setOpen((o) => !o)}>{open ? 'Hide' : 'Edit'}</button>
+      </div>
+      {!open ? (
+        <div className="muted small" style={{ marginTop: 6 }}>
+          {quote.clientPhone && <>📞 {quote.clientPhone} &nbsp;</>}
+          {quote.clientEmail && <>✉ {quote.clientEmail}</>}
+          {!quote.clientPhone && !quote.clientEmail && <>No contact details yet — tap Edit to add phone/email.</>}
+        </div>
+      ) : (
+        <div style={{ marginTop: 8 }}>
+          <label className="field"><span>Client name</span><input className="input" value={form.clientName} onChange={set('clientName')} /></label>
+          <label className="field"><span>Property address</span><input className="input" value={form.address} onChange={set('address')} /></label>
+          <label className="field"><span>Phone</span><input className="input" inputMode="tel" value={form.clientPhone} onChange={set('clientPhone')} placeholder="+64 21 123 4567" /></label>
+          <label className="field"><span>Email</span><input className="input" inputMode="email" value={form.clientEmail} onChange={set('clientEmail')} placeholder="ger@example.co.nz" /></label>
+          <label className="field"><span>Site / access notes <span className="muted">(internal — not shown to client)</span></span>
+            <textarea className="input" rows={2} value={form.siteNotes} onChange={set('siteNotes')} placeholder="Gate code, dog, parking, where to dump…" /></label>
+          <button className="btn block sm" style={{ marginTop: 4 }} onClick={save}>{saved ? 'Saved ✓' : 'Save details'}</button>
+        </div>
+      )}
+    </div>
   );
 }
 

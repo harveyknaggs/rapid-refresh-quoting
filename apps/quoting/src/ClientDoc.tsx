@@ -51,6 +51,9 @@ export function ClientDoc({ quoteId, onBack }: { quoteId: string; onBack: () => 
         <hr style={{ border: 'none', borderTop: '1px solid var(--line)', margin: '14px 0' }} />
 
         <div className="small"><b>For:</b> {quote.clientName}</div>
+        {(quote.clientPhone || quote.clientEmail) && (
+          <div className="small muted">{[quote.clientPhone, quote.clientEmail].filter(Boolean).join(' · ')}</div>
+        )}
         <div className="small"><b>Property:</b> {quote.address}</div>
         <h3 style={{ marginTop: 8 }}>{deriveTitle(quote.clientName, quote.address)}</h3>
 

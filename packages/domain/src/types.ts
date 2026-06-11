@@ -59,6 +59,11 @@ export interface Quote {
   /** Cached display label refreshed from CRM — for offline list/search. Source of truth stays in CRM. */
   clientName: string;
   address: string;
+  /** Cached client contact — shown on the client document. Optional (older quotes predate these / CRM owns truth). */
+  clientPhone?: string;
+  clientEmail?: string;
+  /** Internal site/access notes (gate code, dog, parking). NEVER shown on the client document. */
+  siteNotes?: string;
   currentVersionId: Id;
   acceptedVersionId: Id | null;
   createdAt: string;

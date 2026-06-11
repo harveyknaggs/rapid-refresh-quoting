@@ -17,6 +17,8 @@ export function QuoteList({ onOpen }: { onOpen: (id: string) => void }) {
   const [showNew, setShowNew] = useState(false);
   const [name, setName] = useState('');
   const [address, setAddress] = useState('');
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
 
   const load = async () => {
     const quotes = await repo.listQuotes({ text: text || undefined, status: status === 'all' ? undefined : status });
@@ -29,11 +31,28 @@ export function QuoteList({ onOpen }: { onOpen: (id: string) => void }) {
   };
   useEffect(() => { load(); }, [text, status]);
 
+  const [err, setErr] = useState('');
+
   const create = async () => {
-    if (!name.trim() || !address.trim()) return;
-    // clientId/propertyId are placeholders until linked to the CRM/properties modules.
-    const { quote } = await repo.createQuote({ clientId: ulid(), propertyId: ulid(), clientName: name.trim(), address: address.trim() });
-    onOpen(quote.id);
+    if (!name.trim() || !address.trim()) { setErr('Enter a client name and a property address.'); return; }
+    setErr('');
+    try {
+      // clientId/propertyId are placeholders until linked to the CRM/properties modules.
+      const { quote } = await repo.createQuote({
+        clientId: ulid(), propertyId: ulid(),
+        clientName: name.trim(), address: address.trim(),
+        clientPhone: phone.trim() || undefined, clientEmail: email.trim() || undefined,
+      });
+      onOpen(quote.id);
+    } catch (e: any) {
+      setErr(`Couldn't create the quote: ${e?.message ?? e}`);
+    }
+  };
+
+  const remove = async (q: Quote) => {
+    if (!confirm(`Delete quote #${q.quoteNumber} for ${q.clientName}? This removes all its versions and can't be undone.`)) return;
+    await repo.deleteQuote(q.id);
+    load();
   };
 
   return (
@@ -48,7 +67,10 @@ export function QuoteList({ onOpen }: { onOpen: (id: string) => void }) {
           <div className="preview" style={{ marginTop: 10 }}>
             <label className="field"><span>Client name</span><input className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Ger Murphy" /></label>
             <label className="field"><span>Property address</span><input className="input" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="e.g. 5 Beach Rd, Mount Maunganui" /></label>
+            <label className="field"><span>Phone <span className="muted">(optional)</span></span><input className="input" inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="e.g. +64 21 123 4567" /></label>
+            <label className="field"><span>Email <span className="muted">(optional)</span></span><input className="input" inputMode="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="e.g. ger@example.co.nz" /></label>
             <button className="btn block" onClick={create}>Create quote</button>
+            {err && <div className="issue" style={{ marginTop: 8 }}>⚠ {err}</div>}
           </div>
         )}
 
@@ -69,6 +91,7 @@ export function QuoteList({ onOpen }: { onOpen: (id: string) => void }) {
               <div className="muted small">#{quote.quoteNumber} · {fmt(sellCents)} ex GST</div>
             </div>
             <span className={`badge ${status}`}>{status}</span>
+            <button className="x" title="Delete quote" onClick={(e) => { e.stopPropagation(); remove(quote); }}>✕</button>
           </div>
         ))}
       </div>

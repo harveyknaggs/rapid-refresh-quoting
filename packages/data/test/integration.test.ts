@@ -21,8 +21,8 @@ test('end-to-end: build → price → accept → duplicate → actuals', async (
 
   const reloaded = await repo.getCurrentVersion(quote.id);
   const t = priceQuoteVersion(reloaded!).total;
-  assert.equal(t.costCents, 29600 + 56000);          // $856.00
-  assert.equal(t.sellCents, 49300 + 190000);         // $2393.00 ex GST
+  assert.equal(t.costCents, 29600 + 59920);          // $895.20 (turf material +7% levy: $560→$599.20)
+  assert.equal(t.sellCents, 49300 + 190000);         // $2393.00 ex GST (charge sell unaffected by levy)
   assert.equal(t.gstCents, 35895);                   // 15%
   assert.equal(t.grandTotalInclCents, 275195);       // $2751.95 incl
 

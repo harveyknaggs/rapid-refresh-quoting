@@ -8,10 +8,18 @@ export interface NewQuoteInput {
   propertyId: Id;
   clientName: string;   // cached display label (from CRM)
   address: string;      // cached display label (from CRM)
+  clientPhone?: string; // cached contact — shown on client doc
+  clientEmail?: string;
+  siteNotes?: string;   // internal access notes — never on client doc
   validFrom?: string;
   validUntil?: string;
   scopes?: Scope[];
 }
+
+/** Quote-level client/property fields that can be edited after creation (cached from CRM later). */
+export type QuoteDetailsPatch = Partial<
+  Pick<Quote, 'clientName' | 'address' | 'clientPhone' | 'clientEmail' | 'siteNotes'>
+>;
 
 export interface QuoteFilter {
   clientId?: Id;
@@ -24,6 +32,8 @@ export interface QuoteRepository {
   createQuote(input: NewQuoteInput): Promise<{ quote: Quote; version: QuoteVersion }>;
   getQuote(id: Id): Promise<Quote | null>;
   listQuotes(filter?: QuoteFilter): Promise<Quote[]>;
+  updateQuoteDetails(id: Id, patch: QuoteDetailsPatch): Promise<Quote>; // edit cached client/property fields
+  deleteQuote(id: Id): Promise<void>; // removes the quote + all its versions and actuals
 
   // --- versions (non-destructive) ---
   getVersion(id: Id): Promise<QuoteVersion | null>;

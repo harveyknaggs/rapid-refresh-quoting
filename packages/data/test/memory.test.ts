@@ -57,6 +57,39 @@ test('duplicate-as-template: fresh draft, copied scopes with NEW ids', async () 
   assert.equal(dup.version.status, 'draft');
 });
 
+test('client contact captured on create and editable via updateQuoteDetails', async () => {
+  const repo = new InMemoryQuoteRepository();
+  const { quote } = await repo.createQuote({
+    clientId: ulid(), propertyId: ulid(), clientName: 'Ger Murphy', address: '5 Beach Rd',
+    clientPhone: '+64 21 123 4567', clientEmail: 'ger@example.co.nz',
+  });
+  assert.equal(quote.clientPhone, '+64 21 123 4567');
+  assert.equal(quote.clientEmail, 'ger@example.co.nz');
+
+  const updated = await repo.updateQuoteDetails(quote.id, { clientPhone: '+64 27 999 0000', siteNotes: 'Gate code 1234' });
+  assert.equal(updated.clientPhone, '+64 27 999 0000');
+  assert.equal(updated.clientEmail, 'ger@example.co.nz');   // untouched fields preserved
+  assert.equal(updated.siteNotes, 'Gate code 1234');
+
+  const reloaded = await repo.getQuote(quote.id);
+  assert.equal(reloaded!.clientPhone, '+64 27 999 0000');   // persisted
+  assert.equal(reloaded!.siteNotes, 'Gate code 1234');
+
+  await assert.rejects(() => repo.updateQuoteDetails('nope', { clientName: 'X' }));
+});
+
+test('deleteQuote removes the quote and its versions + actuals', async () => {
+  const repo = new InMemoryQuoteRepository();
+  const { quote, version } = await repo.createQuote(baseInput());
+  await repo.addActual({ quoteId: quote.id, scopeId: null, lineItemId: null, description: 'Skip', amountCents: 5000 });
+
+  await repo.deleteQuote(quote.id);
+  assert.equal(await repo.getQuote(quote.id), null);
+  assert.equal(await repo.getVersion(version.id), null);
+  assert.equal((await repo.listActuals(quote.id)).length, 0);
+  assert.equal((await repo.listQuotes()).length, 0);
+});
+
 test('search by address/client; filter by status; record actuals', async () => {
   const repo = new InMemoryQuoteRepository();
   const a = await repo.createQuote({ clientId: ulid(), propertyId: ulid(), clientName: 'Ger Murphy', address: '5 Beach Rd' });

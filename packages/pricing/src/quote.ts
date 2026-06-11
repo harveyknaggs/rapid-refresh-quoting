@@ -21,6 +21,7 @@ export interface LineInput {
   quantity: number;
   costRateCents: number;
   costRateGstInclusive?: boolean; // supplier/Bunnings = true → ÷1.15 to true cost
+  fuelLevyPct?: number;           // +levy on true material cost (e.g. 0.07 on all materials)
   pricing: Pricing;
 }
 export interface LineResult {
@@ -31,7 +32,8 @@ export interface LineResult {
 }
 
 export const computeLine = (input: LineInput): LineResult => {
-  const trueRate = input.costRateGstInclusive ? stripGst(input.costRateCents) : input.costRateCents;
+  const stripped = input.costRateGstInclusive ? stripGst(input.costRateCents) : input.costRateCents;
+  const trueRate = stripped * (1 + (input.fuelLevyPct ?? 0)); // fuel levy on the true material cost
   const costCents = Math.round(trueRate * input.quantity);
 
   let sellCents: number;

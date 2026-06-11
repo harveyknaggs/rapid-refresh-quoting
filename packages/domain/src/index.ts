@@ -12,12 +12,16 @@ import type { Scope, QuoteVersion } from './types.ts';
 export const deriveTitle = (clientName: string, address: string): string =>
   `${clientName} – ${address} – Quote`;
 
+/** Fuel levy: +7% on ALL material costs (any supplier), applied before margin/delivery. */
+export const FUEL_LEVY = 0.07;
+
 /** Price one scope through the shared pricing layer (sum of rounded lines). */
 export const priceScope = (scope: Scope): Totals =>
   computeScope(scope.lines.map((l) => computeLine({
     quantity: l.quantity,
     costRateCents: l.costRateCents,
     costRateGstInclusive: l.costRateGstInclusive,
+    fuelLevyPct: l.type === 'material' ? FUEL_LEVY : 0, // levy on materials only
     pricing: l.pricing,
   })));
 

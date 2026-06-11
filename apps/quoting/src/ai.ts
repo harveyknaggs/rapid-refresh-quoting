@@ -12,7 +12,8 @@ const MODEL = 'claude-sonnet-4-6';
 
 const SYSTEM = [
   'You generate quote line-item INPUTS for a New Zealand landscaping business (Rapid Refresh).',
-  'The app computes final sell prices from your inputs — do NOT compute sell prices yourself.',
+  'The app computes final sell prices, GST, margins AND the 7% fuel levy from your inputs —',
+  'do NOT compute sell prices, GST or the fuel levy yourself. Enter BASE costs only.',
   'Use the PRICE BOOK provided for costs and default pricing. If an item is not in it, estimate and say so in the description.',
   '',
   'Rules:',
@@ -20,12 +21,19 @@ const SYSTEM = [
   '- Units: m2, m3, lineal_m, each, hour, load, flat.',
   '- Convert measurements to quantities: area = L×W (m2); volume = area×depth (m3).',
   '  Add ~10% wastage to bulk material VOLUMES (chip, bark, soil, aggregate) and note it in the description.',
-  '- Labour: type "labour", unit "hour", costRateCents ≈ 3700, pricing {"method":"margin","rate":0.40}. Never charge $65 directly.',
-  '- Materials: pricing {"method":"margin","rate":R} using the price-book default (else 0.40; bulk materials often 0.30).',
-  '- Fixed sell-rate items (turf sell, deck staining, lawn): pricing {"method":"charge","sellRateCents":X}.',
-  '- GST: set costRateGstInclusive true ONLY if the price book marks that item GST-inclusive.',
-  '- Delivery: if a bulk material needs carting, add a separate "other" line "Delivery (N loads)".',
-  '  Bark trailer = 2 m3/load; AP20/aggregate ≈ 0.667 m3/load; $6000 cents per load.',
+  '  Default bark/mulch depth 50mm (0.05 m) when not stated; chip/aggregate use the depth given.',
+  '- HANDLING: for every bulk material supplied, add a LABOUR line to move/spread it at 1 hr per m3.',
+  '- LABOUR: type "labour", unit "hour", costRateCents 3700 ($37/hr cost),',
+  '  pricing {"method":"charge","sellRateCents":6500} — labour is charged at the standard $65/hr.',
+  '- MATERIALS bought & carted (bark, chip, soil, stone, AP20, timber, pavers, weedmat, plants):',
+  '  pricing {"method":"margin","rate":R} on the price-book cost. R = item default, else 0.40;',
+  '  loose bulk (bark/chip/soil/aggregate) often 0.30. Enter BASE cost — the app adds the 7% levy itself.',
+  '- FIXED-RATE items (ready lawn, hydroseed, deck staining $32/m², timber edging $33.33/lm, turf,',
+  '  waterblast $4.50/m², house wash, retaining $280/lm, lawn prep): pricing {"method":"charge","sellRateCents":X} from the price book.',
+  '- GST: costRateGstInclusive true ONLY if the price book marks the item GST-inclusive (CLS wholesale = false; Bunnings/retail = true).',
+  '- Delivery: if bulk material needs carting, add a separate "other" line, pricing {"method":"passthrough"},',
+  '  using the price-book "Delivery / cartage" cost per load. Bark trailer 2 m3/load; AP20/aggregate ≈ 0.667 m3/load.',
+  '- Aim for ~40% BLENDED margin across the quote (labour & fixed items run higher; loose bulk a bit lower).',
   '- Keep scopes SEPARATE — one scope per distinct area/job mentioned. Never merge them.',
   '- State assumptions briefly in the line description rather than asking questions.',
   '',
@@ -80,12 +88,18 @@ export async function generateScopes(description: string, rateCard: RateCardItem
       'anthropic-dangerous-direct-browser-access': 'true',
     },
     body: JSON.stringify({
-      model: MODEL, max_tokens: 4000, system: SYSTEM,
+      // 16k keeps a non-streaming browser request under HTTP timeouts while giving
+      // big multi-scope jobs room (Sonnet 4.6 allows up to 64k, but that needs streaming).
+      model: MODEL, max_tokens: 16000, system: SYSTEM,
       messages: [{ role: 'user', content: `PRICE BOOK (JSON):\n${JSON.stringify(priceBook)}\n\nJOB DESCRIPTION:\n${description}\n\nReturn the JSON now.` }],
     }),
   });
   if (!res.ok) throw new Error(`AI error ${res.status}: ${(await res.text()).slice(0, 200)}`);
   const data = await res.json();
+  // The response ran out of room — the JSON is cut off and won't parse. Say so plainly.
+  if (data.stop_reason === 'max_tokens') {
+    throw new Error('That job was too big to generate in one go. Try describing one area at a time, or split it into a couple of smaller goes.');
+  }
   const text = (data.content || []).map((c: any) => c.text || '').join('');
   return toScopes(parseJson(text));
 }

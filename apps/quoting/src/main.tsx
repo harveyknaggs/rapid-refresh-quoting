@@ -1,14 +1,12 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { App } from './App.tsx';
-import { Gate } from './Gate.tsx';
+// import { Gate } from './Gate.tsx'; // passcode gate disabled for now — re-wrap <App/> in <Gate> to re-enable
 import './styles.css';
 
 createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <Gate>
-      <App />
-    </Gate>
+    <App />
   </React.StrictMode>,
 );
 

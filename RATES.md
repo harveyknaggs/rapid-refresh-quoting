@@ -17,7 +17,9 @@ Source = the claude.ai "quoting" project export (87 chats). Confidence noted per
 - **+10% wastage** on bulk material volumes.
 - **Handling labour = 1 hr per m³** of bulk material moved/spread (a labour line at $37 cost / $65 sell).
 - **Fuel levy +7%** on all material cost (engine adds it — never enter it).
-- Delivery as a separate line per load (bark trailer 2 m³/load; AP20/aggregate ≈ 0.667 m³/load).
+- **Cartage (per product, carted separately):** volume **> 2 m³ → flat $75.65 delivery** (one per product,
+  NOT per m³ — 6 m³ is still one $75.65). **≤ 2 m³ → we pick it up: 1 hr labour + $15 diesel.** Two products
+  each needing it = two cartage entries (3 m³ chip + 5 m³ bark = 2 deliveries).
 
 ## Labour & machine hire
 

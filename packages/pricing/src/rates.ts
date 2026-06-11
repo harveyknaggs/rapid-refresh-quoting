@@ -30,6 +30,27 @@ export interface BarkResult {
   deliveryCents: Cents;
 }
 
+// ---- Cartage (per bulk material/product) ----
+// Over 2 m³ → supplier delivers at a FLAT fee (one per product, not per m³).
+// 2 m³ or under → we pick it up: allow 1 hr labour + diesel.
+export const DELIVERY_THRESHOLD_M3 = 2;
+export const DELIVERY_FLAT_CENTS = 7565;   // $75.65 flat per product over 2 m³
+export const PICKUP_LABOUR_HOURS = 1;      // 1 hr to go and collect
+export const PICKUP_DIESEL_CENTS = 1500;   // $15 diesel
+
+export type Cartage =
+  | { mode: 'delivery'; deliveryCents: Cents }
+  | { mode: 'pickup'; labourHours: number; dieselCents: Cents };
+
+/** Cartage for ONE product given its volume. Each product is carted separately. */
+export const cartage = (
+  m3: number,
+  opts: { deliveryCents?: number; dieselCents?: number } = {},
+): Cartage =>
+  m3 > DELIVERY_THRESHOLD_M3
+    ? { mode: 'delivery', deliveryCents: opts.deliveryCents ?? DELIVERY_FLAT_CENTS }
+    : { mode: 'pickup', labourHours: PICKUP_LABOUR_HOURS, dieselCents: opts.dieselCents ?? PICKUP_DIESEL_CENTS };
+
 /**
  * Bark/chip cost: base + 7% fuel levy (on base, BEFORE delivery) + $60/load delivery.
  * Trailer = 2 m³ (6 scoops). Aggregate/AP20 is heavier — pass capacityM3 ≈ 0.667 (2 scoops).

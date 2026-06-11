@@ -146,9 +146,14 @@ export const seedRateCard = (): RateCardItem[] => [
     defaultPricing: { method: 'margin', rate: 0.40 }, notes: 'Cost $150–200; roof+gutters ~$950.', active: true }),
 
   // ---- Site costs ----
-  item({ key: 'delivery', label: 'Delivery / cartage', unit: 'load', type: 'other',
-    costRateCents: 10000, costRateGstInclusive: false, sellRateCents: null,
-    defaultPricing: { method: 'passthrough' }, notes: '$50–200/load (commonly $80–120).', active: true }),
+  item({ key: 'delivery', label: 'Delivery (per product, over 2 m³)', unit: 'flat', type: 'other',
+    costRateCents: 7565, costRateGstInclusive: false, sellRateCents: null,
+    defaultPricing: { method: 'margin', rate: 0.40 },
+    notes: 'Flat $75.65 per product when its volume > 2 m³ (one per product, NOT per m³). ≤2 m³ → pickup (1 hr labour + diesel).', active: true }),
+  item({ key: 'pickup_diesel', label: 'Pickup diesel (≤2 m³)', unit: 'flat', type: 'other',
+    costRateCents: 1500, costRateGstInclusive: false, sellRateCents: null,
+    defaultPricing: { method: 'margin', rate: 0.40 },
+    notes: 'When we collect (≤2 m³): add 1 hr labour + this $15 diesel.', active: true }),
   item({ key: 'dumping', label: 'Dumping / green waste', unit: 'flat', type: 'other',
     costRateCents: 15000, costRateGstInclusive: false, sellRateCents: null,
     defaultPricing: { method: 'margin', rate: 0.40 }, notes: 'Frews per tonne ex-GST: greenwaste $160–175, hardfill/soil $40–150, stumps $210–220, mixed C&D ~$291–297. Estimate load weight (greenwaste ~0.3–0.5 t/m³, soil/hardfill ~1.5 t/m³).', active: true }),

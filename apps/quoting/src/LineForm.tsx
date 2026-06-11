@@ -3,7 +3,7 @@ import {
   ulid, FUEL_LEVY, suppliersFor, resolveSupplierCost, defaultSupplierFor,
   type LineItem, type LineType, type Unit, type RateCardItem,
 } from '@rapid-refresh/domain';
-import { computeLine, barkChipCost, isMarginOutsideBand } from '@rapid-refresh/pricing';
+import { computeLine, isMarginOutsideBand } from '@rapid-refresh/pricing';
 import { fmt, pct, dollarsToCents, num } from './format.ts';
 
 const UNITS: Unit[] = ['m2', 'm3', 'lineal_m', 'each', 'hour', 'load', 'flat'];
@@ -72,18 +72,8 @@ export function LineForm({ rateCard, onAdd, onCancel, initial }: {
   const quantity = waste ? rawQty * (1 + num(wastePct) / 100) : rawQty;
 
   const built = useMemo((): { line: LineItem; note: string } => {
-    let costRateCents = dollarsToCents(costDollars);
-    let note = '';
-    if (selected?.modifiers && (selected.modifiers.fuelLevy || selected.modifiers.deliveryPerLoadCents) && unit === 'm3' && quantity > 0) {
-      const bark = barkChipCost(quantity, {
-        baseRateCents: costRateCents,
-        fuelLevy: 0, // the pricing engine adds the 7% levy on material lines — don't double-count it here
-        deliveryPerLoadCents: selected.modifiers.deliveryPerLoadCents ?? 0,
-        capacityM3: selected.modifiers.capacityM3 ?? 1e9,
-      });
-      costRateCents = Math.round(bark.costCents / quantity);
-      note = `incl ${fmt(bark.deliveryCents)} delivery (${bark.loads} load${bark.loads > 1 ? 's' : ''})`;
-    }
+    const costRateCents = dollarsToCents(costDollars);
+    const note = ''; // cartage is now a separate line (delivery >2 m³ / pickup ≤2 m³), not folded into cost
     const pricing = method === 'margin'
       ? { method: 'margin' as const, rate: num(marginRate) }
       : method === 'charge'

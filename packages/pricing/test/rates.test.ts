@@ -1,6 +1,16 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { area, volume, applyWaste, loadsFromVolume, barkChipCost } from '../src/rates.ts';
+import { area, volume, applyWaste, loadsFromVolume, barkChipCost, cartage } from '../src/rates.ts';
+
+test('cartage: >2 m³ = flat $75.65 delivery; ≤2 m³ = pickup (1 hr + $15 diesel)', () => {
+  const big = cartage(6);
+  assert.equal(big.mode, 'delivery');
+  if (big.mode === 'delivery') assert.equal(big.deliveryCents, 7565); // flat, not per m³
+  assert.equal(cartage(3).mode, 'delivery');                          // 3 m³ → delivery
+  const small = cartage(2);
+  assert.equal(small.mode, 'pickup');                                 // exactly 2 m³ → pickup
+  if (small.mode === 'pickup') { assert.equal(small.labourHours, 1); assert.equal(small.dieselCents, 1500); }
+});
 
 test('measurement helpers', () => {
   assert.equal(area(4, 3), 12);                       // 4m × 3m = 12 m²

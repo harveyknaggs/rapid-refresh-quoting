@@ -55,12 +55,21 @@ function normPricing(p: any): Pricing {
 }
 
 function parseJson(text: string): any {
-  const t = String(text).trim().replace(/^```(json)?/i, '').replace(/```$/, '').trim();
-  try { return JSON.parse(t); } catch {
-    const s = t.indexOf('{'), e = t.lastIndexOf('}');
-    if (s >= 0 && e > s) return JSON.parse(t.slice(s, e + 1));
-    throw new Error('Could not read the AI response.');
+  let t = String(text).trim();
+  // Pull JSON out of a ```json … ``` (or ```) fence if the model wrapped it.
+  const fence = t.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  if (fence) t = fence[1].trim();
+  try { return JSON.parse(t); } catch { /* fall through to extraction */ }
+  // Extract the outermost JSON object/array even if there's prose around it.
+  const starts = ['{', '['].map((c) => t.indexOf(c)).filter((i) => i >= 0);
+  const first = starts.length ? Math.min(...starts) : -1;
+  const last = Math.max(t.lastIndexOf('}'), t.lastIndexOf(']'));
+  if (first >= 0 && last > first) {
+    try { return JSON.parse(t.slice(first, last + 1)); } catch { /* fall through */ }
   }
+  // Couldn't parse — surface what the AI actually said so it's diagnosable.
+  const said = t.replace(/\s+/g, ' ').trim().slice(0, 180) || '(empty response)';
+  throw new Error('The AI didn’t return usable line items. It said: “' + said + '”');
 }
 
 function toScopes(parsed: any): Scope[] {
@@ -105,5 +114,8 @@ export async function generateScopes(description: string, rateCard: RateCardItem
     throw new Error('That job was too big to generate in one go. Try describing one area at a time, or split it into a couple of smaller goes.');
   }
   const text = (data.content || []).map((c: any) => c.text || '').join('');
+  if (!text.trim()) {
+    throw new Error(`The AI returned no text (stop reason: ${data.stop_reason || 'unknown'}). Try rewording, or check your API credit.`);
+  }
   return toScopes(parseJson(text));
 }

@@ -30,6 +30,10 @@ export function QuoteEditor({ quoteId, onBack, onViewDoc, onOpen }: {
   const [desc, setDesc] = useState('');
   const [genBusy, setGenBusy] = useState(false);
   const [genErr, setGenErr] = useState('');
+  const [adjustFor, setAdjustFor] = useState<string | null>(null);
+  const [adjustText, setAdjustText] = useState('');
+  const [adjustBusy, setAdjustBusy] = useState(false);
+  const [adjustErr, setAdjustErr] = useState('');
   const saveTimer = useRef<number | undefined>(undefined);
 
   const load = async () => {
@@ -78,6 +82,23 @@ export function QuoteEditor({ quoteId, onBack, onViewDoc, onOpen }: {
     } catch (e: any) {
       setGenErr(String(e && e.message ? e.message : e));
     } finally { setGenBusy(false); }
+  };
+
+  // Per-scope: re-describe one part in plain English → rebuild & reprice just that scope's lines.
+  const adjustScope = async (scopeId: string) => {
+    if (!adjustText.trim()) return;
+    setAdjustBusy(true); setAdjustErr('');
+    try {
+      const scopes = await generateScopes(adjustText, rateCard);
+      const newLines = scopes.flatMap((s) => s.lines);
+      if (!newLines.length) setAdjustErr('Nothing produced — try adding more detail.');
+      else {
+        setScopes(version.scopes.map((s) => (s.id === scopeId ? { ...s, lines: newLines.map((l, i) => ({ ...l, order: i })) } : s)));
+        setAdjustFor(null); setAdjustText('');
+      }
+    } catch (e: any) {
+      setAdjustErr(String(e && e.message ? e.message : e));
+    } finally { setAdjustBusy(false); }
   };
 
   const priced = priceQuoteVersion(version);
@@ -163,6 +184,21 @@ export function QuoteEditor({ quoteId, onBack, onViewDoc, onOpen }: {
             {addingFor === scope.id
               ? <LineForm rateCard={rateCard} onAdd={(line) => addLine(scope.id, line)} onCancel={() => setAddingFor(null)} />
               : <button className="btn ghost block sm" style={{ marginTop: 10 }} onClick={() => setAddingFor(scope.id)}>+ Add line</button>}
+
+            {adjustFor === scope.id ? (
+              <div className="preview" style={{ marginTop: 8 }}>
+                <div className="muted small" style={{ marginBottom: 6 }}>✨ Re-describe this part in plain English — it rebuilds &amp; reprices this scope's lines (replaces the lines above).</div>
+                <textarea className="input" rows={2} value={adjustText} onChange={(e) => setAdjustText(e.target.value)}
+                  placeholder="e.g. 40 m² of black bark at 50mm, supply &amp; spread + weedmat" />
+                <div className="row" style={{ marginTop: 6 }}>
+                  <button className="btn sm" disabled={adjustBusy || !adjustText.trim()} onClick={() => adjustScope(scope.id)}>{adjustBusy ? 'Generating…' : '✨ Rebuild scope'}</button>
+                  <button className="btn secondary sm" onClick={() => { setAdjustFor(null); setAdjustErr(''); }}>Cancel</button>
+                </div>
+                {adjustErr && <div className="issue" style={{ marginTop: 6 }}>⚠ {adjustErr}</div>}
+              </div>
+            ) : (
+              <button className="btn ghost block sm" style={{ marginTop: 8 }} onClick={() => { setAdjustFor(scope.id); setAdjustText(''); setAdjustErr(''); }}>✨ Adjust this scope</button>
+            )}
 
             <button className="btn danger sm" style={{ marginTop: 8 }} onClick={() => deleteScope(scope.id)}>Delete scope</button>
           </div>

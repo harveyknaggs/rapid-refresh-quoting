@@ -15,7 +15,7 @@ Source = the claude.ai "quoting" project export (87 chats). Confidence noted per
 
 - **Volume** = area × depth. **Bark/mulch default depth 50 mm** (0.05 m) unless stated; chip/aggregate use the given depth.
 - **+10% wastage** on bulk material volumes.
-- **Handling labour = 1 hr per m³** of bulk material moved/spread (a labour line at $37 cost / $65 sell).
+- **Handling labour (per m³ of material):** moving OUT (dig out + cart to dump) = **2 hr/m³**; moving IN (bring in + spread/lay) = **1 hr/m³**. Labour at $37 cost / $65 sell.
 - **Fuel levy +7%** on all material cost (engine adds it — never enter it).
 - **Cartage (per product, carted separately):** volume **> 2 m³ → flat $75.65 delivery** (one per product,
   NOT per m³ — 6 m³ is still one $75.65). **≤ 2 m³ → we pick it up: 1 hr labour + $15 diesel.** Two products
@@ -67,7 +67,9 @@ Source = the claude.ai "quoting" project export (87 chats). Confidence noted per
 | Amuri stone | $160/m³ + 10% fuel = **$176/m³** | — | Outdoor-cleaning job |
 | AP20 / GAP20 basecourse | **$44.80/m³ (Frews ex-GST)** | +margin | AP40 $42.50, AP65 $45.60. CLS = retail−10%; Fulton Hogan similar. lay ~2 hrs/13 m² |
 | Crusher dust (AP5) | **$72/m³ (Frews)** | +margin | Garden Box AP5 $38.35 (confirm m³ vs scoop) |
-| Pavers — varies by type | $15.28 (500×500) · $37.17 · $48.93 · **$119.90/m² premium** | per-paver +40% | + mortar $150–200; old blanket $220/m² too low for premium |
+| Paving prep (dig-out + AP20 base) | ~$26/m² (AP20 0.1m³ + soil dump 0.1m³ + dig 2hr/m³ + in 1hr/m³) | **$65/m² sell** | flat rate for 100mm dig-out + 100mm AP20 compacted |
+| Pavers — supply (separate line) | $15.28 (500×500) · $37.17 · $48.93 · **$119.90/m² premium** | per-paver +40% | + lay labour separately; + mortar $150–200 |
+| **Full paving job** | — | prep $65/m² + pavers (cost+margin) + lay labour | three separate lines |
 | Retaining wall (supply & install, to ~1.2 m) | — | **$280/lm** | Retaining-and-paving job |
 | Retaining timber (100×100 H5 post) | **$18/lm** | — | Retaining-timber job |
 | Concrete | supplier price ÷1.15 (GST incl) | +margin | ~$150–250/job; Elmslie, 16 Memorial |

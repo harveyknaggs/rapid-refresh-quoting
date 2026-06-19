@@ -91,6 +91,12 @@ export const seedRateCard = (): RateCardItem[] => [
   item({ key: 'corten_boxing', label: 'Corten steel boxing', unit: 'lineal_m', type: 'material',
     costRateCents: 4500, costRateGstInclusive: false, sellRateCents: null,
     defaultPricing: { method: 'margin', rate: 0.40 }, active: true }),
+  // Paving prep — sold at a flat $65/m² (dig-out + AP20 base). Pavers + lay labour are separate lines.
+  item({ key: 'paving_prep', label: 'Paving prep (dig-out + AP20 base)', unit: 'm2', type: 'other',
+    costRateCents: 2600, costRateGstInclusive: false, sellRateCents: 6500,
+    defaultPricing: { method: 'charge', sellRateCents: 6500 },
+    notes: '$65/m² sell = dig out 100mm + 100mm AP20 compacted. Approx cost/m²: AP20 0.1m³ (~$4.48) + 0.1m³ soil dumped (hardfill) + labour dig-out 2hr/m³ & bring-in 1hr/m³. Add pavers (cost+margin) + lay labour separately.', active: true }),
+
   // Pavers — Garden Box listed prices stripped to ex-GST (retail ÷1.15). Actual trade ~a few % lower.
   item({ key: 'paver_400', label: 'Paver 400×400 (Feinwerk)', unit: 'each', type: 'material',
     costRateCents: 1087, costRateGstInclusive: false, sellRateCents: null,

@@ -67,7 +67,7 @@ Source = the claude.ai "quoting" project export (87 chats). Confidence noted per
 | Amuri stone | $160/m³ + 10% fuel = **$176/m³** | — | Outdoor-cleaning job |
 | AP20 / GAP20 basecourse | **$44.80/m³ (Frews ex-GST)** | +margin | AP40 $42.50, AP65 $45.60. CLS = retail−10%; Fulton Hogan similar. lay ~2 hrs/13 m² |
 | Crusher dust (AP5) | **$72/m³ (Frews)** | +margin | Garden Box AP5 $38.35 (confirm m³ vs scoop) |
-| Paving prep (dig-out + AP20 base) | ~$26/m² (AP20 0.1m³ + soil dump 0.1m³ + dig 2hr/m³ + in 1hr/m³) | **$65/m² sell** | flat rate for 100mm dig-out + 100mm AP20 compacted |
+| Paving prep (dig-out + AP20 base) | **~$22.33/m²** (AP20 0.1m³ $4.48 + soil dump 0.1m³ $6.75 @ Frews $45/t + dig 0.2hr + in 0.1hr) | **$65/m² sell** | flat rate for 100mm dig-out + 100mm AP20 compacted |
 | Pavers — supply (separate line) | $15.28 (500×500) · $37.17 · $48.93 · **$119.90/m² premium** | per-paver +40% | + lay labour separately; + mortar $150–200 |
 | **Full paving job** | — | prep $65/m² + pavers (cost+margin) + lay labour | three separate lines |
 | Retaining wall (supply & install, to ~1.2 m) | — | **$280/lm** | Retaining-and-paving job |

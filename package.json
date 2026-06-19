@@ -9,6 +9,10 @@
   "scripts": {
     "test": "npm run test --workspaces --if-present",
     "dev": "npm run dev --workspace @rapid-refresh/quoting-app",
-    "build": "npm run build --workspace @rapid-refresh/quoting-app"
+    "build": "npm run build --workspace @rapid-refresh/quoting-app",
+    "start": "serve apps/quoting/dist -s -l ${PORT:-3000}"
+  },
+  "dependencies": {
+    "serve": "^14.2.4"
   }
 }

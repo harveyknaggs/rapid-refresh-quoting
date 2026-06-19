@@ -40,6 +40,7 @@ const SYSTEM = [
   '    volume > 2 m3 → add ONE "Delivery" line {"type":"other","pricing":{"method":"margin","rate":0.40},"costRateCents":7565} ($75.65 flat, NOT per m3).',
   '    volume <= 2 m3 → WE collect: add a 1-hour labour line PLUS a "$15 diesel" line {"type":"other","pricing":{"method":"margin","rate":0.40},"costRateCents":1500}.',
   '    Two different products that each need carting = two separate cartage entries (e.g. 3 m3 chip + 5 m3 bark = 2 deliveries).',
+  '    TIMBER is separate: when timber/boxing is used, add ONE "Timber cartage" line $65/job {"type":"other","pricing":{"method":"margin","rate":0.40},"costRateCents":6500} — not the bulk-material rule above.',
   '- Aim for ~40% BLENDED margin across the quote (labour & fixed items run higher; loose bulk a bit lower).',
   '- Keep scopes SEPARATE — one scope per distinct area/job mentioned. Never merge them.',
   '- State assumptions briefly in the line description rather than asking questions.',

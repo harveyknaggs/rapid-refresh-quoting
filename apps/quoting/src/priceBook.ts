@@ -58,7 +58,16 @@ function cached(): RateCardItem[] | null {
   try { const r = localStorage.getItem(CACHE_KEY); return r ? JSON.parse(r) : null; } catch { return null; }
 }
 
-/** Returns the live price book if a URL is set & reachable, else last cache, else the seed. */
+/** The curated built-in price book is ALWAYS the base (so its fixed-rate items, suppliers and the
+ *  rates Roy has set are guaranteed present). A live Google Sheet (if set) only ADDS items whose key
+ *  isn't already curated — it never overrides or hides a built-in item. */
+function mergeWithSeed(sheet: RateCardItem[]): RateCardItem[] {
+  const seed = seedRateCard();
+  const have = new Set(seed.map((i) => i.key));
+  const extra = sheet.filter((i) => i.key && !have.has(i.key));
+  return [...seed, ...extra];
+}
+
 export async function loadPriceBook(): Promise<RateCardItem[]> {
   const url = getPriceBookUrl();
   if (url) {
@@ -66,9 +75,10 @@ export async function loadPriceBook(): Promise<RateCardItem[]> {
       const res = await fetch(url, { cache: 'no-store' });
       if (res.ok) {
         const items = rowsToItems(parseCsv(await res.text()));
-        if (items.length) { try { localStorage.setItem(CACHE_KEY, JSON.stringify(items)); } catch { /* */ } return items; }
+        if (items.length) { try { localStorage.setItem(CACHE_KEY, JSON.stringify(items)); } catch { /* */ } return mergeWithSeed(items); }
       }
     } catch { /* fall through */ }
   }
-  return cached() || seedRateCard();
+  const c = cached();
+  return c ? mergeWithSeed(c) : seedRateCard();
 }

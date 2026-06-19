@@ -34,6 +34,7 @@ const SYSTEM = [
   '  waterblast $4.50/m², house wash, retaining $280/lm, lawn prep, paving prep $65/m²): pricing {"method":"charge","sellRateCents":X} from the price book.',
   '- PAVING = three lines: (1) "Paving prep" charge $65/m2 (dig out 100mm + 100mm AP20 base, compacted);',
   '  (2) the pavers as a material line at cost+margin; (3) labour to lay the pavers. Paving prep already covers the dig-out/AP20/dump/handling — do NOT add those again.',
+  '  OPTIONAL: if edging is needed, add timber edging/boxing at $33.33/lm (charge) down the sides (e.g. both long edges of the patio).',
   '- GST: costRateGstInclusive true ONLY if the price book marks the item GST-inclusive (CLS wholesale = false; Bunnings/retail = true).',
   '- CARTAGE — work it out PER bulk material (each product is carted separately):',
   '    volume > 2 m3 → add ONE "Delivery" line {"type":"other","pricing":{"method":"margin","rate":0.40},"costRateCents":7565} ($75.65 flat, NOT per m3).',

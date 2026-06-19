@@ -61,7 +61,7 @@ Source = the claude.ai "quoting" project export (87 chats). Confidence noted per
 
 | Item | Cost | Sell | Notes / source |
 |---|---|---|---|
-| Timber edging / boxing (75×50 H4 + pegs) | **~$18.17/lm** = timber+pegs ~$12 (confirm) + install 1 hr per 6 m ($6.17 @ $37) | **$33.33/lm** all-in | optional both sides of paving |
+| Timber edging / boxing (75×50 H4 + pegs) | **~$10.44/lm** = timber $3.38 + pegs $0.89 (300mm, ~1/m) + install 1 hr per 6 m ($6.17 @ $37) | **$33.33/lm** all-in (~69% margin) | optional both sides of paving |
 | 19mm drainage chip | **$102/m³** | +20–30% | +10% wastage on volume. 76 Tuahiwi |
 | White stone | $160/m³ | +40% | Blackison/Oxford |
 | Amuri stone | $160/m³ + 10% fuel = **$176/m³** | — | Outdoor-cleaning job |

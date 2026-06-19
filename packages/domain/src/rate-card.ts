@@ -85,9 +85,9 @@ export const seedRateCard = (): RateCardItem[] => [
 
   // ---- Edging / hard landscaping ----
   item({ key: 'boxing_timber', label: 'Timber edging / boxing (75×50 H4 + pegs)', unit: 'lineal_m', type: 'other',
-    costRateCents: 1817, costRateGstInclusive: false, sellRateCents: 3333,
+    costRateCents: 1044, costRateGstInclusive: false, sellRateCents: 3333,
     defaultPricing: { method: 'charge', sellRateCents: 3333 },
-    notes: 'All-in sell $33.33/lm. Cost/lm ≈ $18.17 = 75×50 H4 timber + pegs (~$12/lm — confirm) + install labour 1 hr per 6 m ($6.17/lm @ $37). Optional both sides of paving.', active: true }),
+    notes: 'All-in sell $33.33/lm. Cost/lm ≈ $10.44 = 75×50 H4 timber $3.38 + pegs $0.89 (300mm, ~1/m — adjust spacing) + install 1 hr per 6 m ($6.17 @ $37). Optional both sides of paving.', active: true }),
   item({ key: 'corten_boxing', label: 'Corten steel boxing', unit: 'lineal_m', type: 'material',
     costRateCents: 4500, costRateGstInclusive: false, sellRateCents: null,
     defaultPricing: { method: 'margin', rate: 0.40 }, active: true }),

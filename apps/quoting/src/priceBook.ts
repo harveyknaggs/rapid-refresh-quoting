@@ -2,6 +2,7 @@
 // invoice pipeline keeps current. Falls back to the in-code seed (and a cached copy) offline.
 
 import { seedRateCard, type RateCardItem, type Unit, type Pricing } from '@rapid-refresh/domain';
+import { customRateItems } from './customRates.ts';
 
 const URL_KEY = 'rr.priceBookUrl';
 const CACHE_KEY = 'rr.priceBookCache.v1';
@@ -61,11 +62,14 @@ function cached(): RateCardItem[] | null {
 /** The curated built-in price book is ALWAYS the base (so its fixed-rate items, suppliers and the
  *  rates Roy has set are guaranteed present). A live Google Sheet (if set) only ADDS items whose key
  *  isn't already curated — it never overrides or hides a built-in item. */
+function base(): RateCardItem[] {
+  return [...seedRateCard(), ...customRateItems()];
+}
 function mergeWithSeed(sheet: RateCardItem[]): RateCardItem[] {
-  const seed = seedRateCard();
-  const have = new Set(seed.map((i) => i.key));
+  const b = base();
+  const have = new Set(b.map((i) => i.key));
   const extra = sheet.filter((i) => i.key && !have.has(i.key));
-  return [...seed, ...extra];
+  return [...b, ...extra];
 }
 
 export async function loadPriceBook(): Promise<RateCardItem[]> {
@@ -80,5 +84,5 @@ export async function loadPriceBook(): Promise<RateCardItem[]> {
     } catch { /* fall through */ }
   }
   const c = cached();
-  return c ? mergeWithSeed(c) : seedRateCard();
+  return c ? mergeWithSeed(c) : base();
 }

@@ -75,9 +75,9 @@ export const seedRateCard = (): RateCardItem[] => [
 
   // ---- Garden bed items ----
   item({ key: 'weedmat', label: 'Weedmat (supply)', unit: 'm2', type: 'material',
-    costRateCents: 55, costRateGstInclusive: false, sellRateCents: null,
+    costRateCents: 57, costRateGstInclusive: false, sellRateCents: null,
     defaultPricing: { method: 'margin', rate: 0.40 },
-    notes: 'CLS mat ~$0.55/m² + pins ~$0.07–0.11 ea. Real cost is the lay labour — add a labour line.', active: true }),
+    notes: '$14.20 / 25 m² (CLS) = $0.57/m². + lay labour.', active: true }),
   item({ key: 'plant_supply', label: 'Plants (supply)', unit: 'each', type: 'material',
     costRateCents: 1000, costRateGstInclusive: false, sellRateCents: null,
     defaultPricing: { method: 'margin', rate: 0.40 },
